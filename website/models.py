@@ -7,14 +7,23 @@ from sqlalchemy.sql import func
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    note = db.Column(db.String(1000))
-    date = db.Column(db.DateTime(timezone=True), default=func.now())
-    used_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    amount = db.Column(db.Integer, default=0, nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    date = db.Column(db.DateTime(timezone=True), default=func.now(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50))
-    email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(50))
-    transactions = db.relationship('Transaction')
+    first_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(50), nullable=False)
+    transactions = db.relationship("Transaction")
+    balance = db.relationship("Balance", back_populates="user")
+
+
+class Balance(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    total = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", back_populates="balance")
