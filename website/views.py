@@ -17,6 +17,8 @@ def home():
 
         if len(description) < 1:
             flash("Note is too short", category="error")
+        elif transaction_amount == 0:
+            flash("Please enter an amount", category="error")
         else:
             new_description = Transaction(
                 description=description,
@@ -24,9 +26,11 @@ def home():
                 amount=transaction_amount,
             )
             db.session.add(new_description)
+            db.session.add()
             db.session.commit()
             flash("Transaction successfully added.", category="success")
-
+    else:
+        pass
     return render_template("home.html", user=current_user)
 
 
