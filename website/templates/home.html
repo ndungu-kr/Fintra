@@ -1,19 +1,84 @@
 {% extends "base.html"%}
-{% block title %}Home{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2 align="left">My account</h1>
-    <div class="card text-bg-primary mb-3" style="max-width: 18rem;">
-        <div class="card-header">Balance</div>
-        <div class="card-body">
-            <h5 class="card-title">{{ user.balance }}</h5>
-            <span>
-                <p class="card-text">Balance explanation</p>
-            </span>
+<main class="mt-5 pt-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 fw-bold fs-3">Dashboard</div>
         </div>
-    </div>
 
-    <h2 align="left">Transactions</h1>
+        <!-- Cards -->
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card text-bg-primary h-100">
+                    <div class="card-header">Header</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Primary title</h5>
+                        <p class="card-text">Some quick example.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-bg-primary h-100">
+                    <div class="card-header">Header</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Primary title</h5>
+                        <p class="card-text">Some quick example.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-bg-primary h-100">
+                    <div class="card-header">Header</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Primary title</h5>
+                        <p class="card-text">Some quick example.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Charts</div>
+                    <div class="card-body">
+                        <canvas class="chart" width="400" height="200"></canvas>
+                        <!-- Go to chart.js for this -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Charts</div>
+                    <div class="card-body">
+                        <canvas class="chart" width="400" height="200"></canvas>
+                        <!-- Go to chart.js for this -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Data Table</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <!-- Go to chart.js for this -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <h2 align="left">Transactions</h2>
         <table id="transactions" class="table table-hover">
             <thead class="table-dark">
                 <th>Amount</th>
@@ -60,5 +125,6 @@
                 <button type="submit" class="btn btn-primary">Add transaction</button>
             </div>
         </form>
-
-        {% endblock %}
+    </div>
+</main>
+{% endblock %}
