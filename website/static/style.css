@@ -1,4 +1,4 @@
-/* ----------- CSS for base ---------- */
+/* --------------------------------- CSS for base -------------------------------- */
 
 :root {
     --offcanvas-width: 270px;
@@ -33,7 +33,7 @@ a.nav-link.px-3.sidebar-link[aria-expanded="true"] span.right-icon.ms-auto {
         overflow: auto !important;
     }
 
-    main {
+    main.base {
         margin-left: var(--offcanvas-width);
     }
 
@@ -54,4 +54,33 @@ a.nav-link.px-3.sidebar-link[aria-expanded="true"] span.right-icon.ms-auto {
 
 }
 
-/* ----------- End of CSS for base ---------- */
+/* --------------------------------- End of CSS for base -------------------------------- */
+
+/* --------------------------------- CSS for login and sign-up -------------------------------- */
+
+/* .form-signin  */
+div.form-signin.w-100.m-auto.text-center {
+    max-width: 330px;
+    padding: 15px;
+}
+
+/* .form-signin .form-floating:focus-within  */
+div.form-signin.w-100.m-auto.text-center div.form-floating:focus-within {
+    z-index: 2;
+}
+
+/* .form-signin input[type="email"]  */
+div.form-signin.w-100.m-auto.text-center input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* .form-signin input[type="password"]  */
+div.form-signin.w-100.m-auto.text-center [type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* --------------------------------- End of CSS for login and sign-up -------------------------------- */
