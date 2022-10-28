@@ -10,7 +10,7 @@ views = Blueprint("views", __name__)
 
 @views.route("/", methods=["GET", "POST"])
 @login_required
-def home():
+def dashboard():
     if request.method == "POST":
         description = request.form.get("description")
         transaction_amount = request.form.get("transaction_amount")
@@ -31,7 +31,7 @@ def home():
             flash("Transaction successfully added.", category="success")
     else:
         pass
-    return render_template("home.html", user=current_user)
+    return render_template("dashboard.html", user=current_user)
 
 
 @views.route("/delete-transaction", methods=["POST"])

@@ -92,6 +92,16 @@
                             </span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#" class="nav-link px-3 active">
+                            <span class="me-2">
+                                <i class="bi bi-activity"></i>
+                            </span>
+                            <span>
+                                Tracker
+                            </span>
+                        </a>
+                    </li>
                     <li class="my-2">
                         <hr class="dropdown-divider bg-light">
                     </li>
@@ -122,34 +132,37 @@
             </nav>
         </div>
     </div>
-    {% endif %}
 
-    <!-- Alerts Section -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    {% if category == "error" %}
-    <div class="alert alert-danger alter-dismissable fade show" role="alert">
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span area-hidden="true">&times;</span>
-        </button>
-    </div>
-    {% else %}
-    <div class="alert alert-danger alter-dismissable fade show" role="alert">
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span area-hidden="true">&times;</span>
-        </button>
-    </div>
     {% endif %}
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
 
     <div class="container">
-        {% block content %}
-        {% endblock %}
+        <main class="mt-5 pt-3">
+            <div class="container-fluid">
+
+                <!-- Alerts Section -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category == "error" %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+
+                {% block content %}
+                {% endblock %}
+
+
+            </div>
+        </main>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

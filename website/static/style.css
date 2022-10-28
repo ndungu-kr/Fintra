@@ -1,3 +1,5 @@
+/* ----------- CSS for base ---------- */
+
 :root {
     --offcanvas-width: 270px;
     --topNavbarHeight: 56px;
@@ -51,3 +53,5 @@ a.nav-link.px-3.sidebar-link[aria-expanded="true"] span.right-icon.ms-auto {
     }
 
 }
+
+/* ----------- End of CSS for base ---------- */
