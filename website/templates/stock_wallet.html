@@ -1,0 +1,82 @@
+{% extends "base.html"%}
+{% block title %}Stock Wallet{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12 fw-bold fs-3 mb-3">Stocks Wallet</div>
+</div>
+
+<!-- Sub-Wallet Metadata -->
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Asset Balance</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Profit/Loss</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Owned stocks -->
+<h5>Owned Stock Assets</h5>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Stocks</th>
+            <th scope="col">Stocks Owned</th>
+            <th scope="col">Value</th>
+            <th scope="col">Profit/Loss</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Tesla</td>
+            <td>100</td>
+            <td>£1000</td>
+            <td>100%</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Stock transactions -->
+<h5>Stock Asset Transactions</h5>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Stock</th>
+            <th scope="col">Amount purchased/sold</th>
+            <th scope="col">Purchase/Sell price</th>
+            <th scope="col">Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Tesla</th>
+            <td>100</td>
+            <td>50</td>
+            <td>10/11/2022</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}

@@ -47,3 +47,39 @@ def delete_transaction():
     #         db.session.commit()
 
     return jsonify({})
+
+
+@views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
+@login_required
+def cryptocurrency_wallet():
+    return render_template("cryptocurrency_wallet.html", user=current_user)
+
+
+@views.route("/forex-wallet", methods=["GET", "POST"])
+@login_required
+def forex_wallet():
+    return render_template("forex_wallet.html", user=current_user)
+
+
+@views.route("/stock-wallet", methods=["GET", "POST"])
+@login_required
+def stock_wallet():
+    return render_template("stock_wallet.html", user=current_user)
+
+
+@views.route("/cryptocurrency-tracker", methods=["GET", "POST"])
+@login_required
+def cryptocurrency_tracker():
+    return render_template("cryptocurrency_tracker.html", user=current_user)
+
+
+@views.route("/forex-tracker", methods=["GET", "POST"])
+@login_required
+def forex_tracker():
+    return render_template("forex_tracker.html", user=current_user)
+
+
+@views.route("/stock-tracker", methods=["GET", "POST"])
+@login_required
+def stock_tracker():
+    return render_template("stock_tracker.html", user=current_user)
