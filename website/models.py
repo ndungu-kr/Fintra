@@ -13,8 +13,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
     wallet = db.relationship("Wallet", backref="user", uselist=False)
-    # transactions = db.relationship("Transaction") # one to many relationship (one user can have many transactions)
-    # balance = db.relationship("Balance", back_populates="user")
 
     def __repr__(self):
         return f"User('{self.first_name}', '{self.email}')"
@@ -22,21 +20,21 @@ class User(db.Model, UserMixin):
 
 class Wallet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
+    total_balance = db.Column(db.DECIMAL, nullable=False, default=0)
     deposits = db.relationship("Deposit", backref="deposits", lazy=True)
     withdrawals = db.relationship("Withdrawal", backref="withdrawals", lazy=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
     crypto_wallet = db.relationship("CryptoWallet", backref="wallet", uselist=False)
     forex_wallet = db.relationship("ForexWallet", backref="wallet", uselist=False)
     stock_wallet = db.relationship("StockWallet", backref="wallet", uselist=False)
-    total_balance = db.Column(db.DECIMAL, nullable=False, default=0)
 
 
 class Deposit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.DECIMAL, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     description = db.Column(db.Text, nullable=False)
     wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
-    amount = db.Column(db.DECIMAL, nullable=False)
 
     def __repr__(self):
         return f"Deposit('{self.id}', '{self.date}')"
