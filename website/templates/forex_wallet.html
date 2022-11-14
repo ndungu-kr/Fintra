@@ -1,0 +1,113 @@
+{% extends "base.html"%}
+{% block title %}Forex Wallet{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12 fw-bold fs-3 mb-3">Forex Wallet</div>
+</div>
+
+<!-- Sub-Wallet Metadata -->
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Forex Balance</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Profit/Loss</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested</div>
+            <div class="card-body">
+                <h5 class="card-title">£0.00</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Buy/Sell currency-->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Note Forex Transaction</div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <a class="btn btn-success m-1 w-100" href="/forex-wallet/buy-forex" role="button">Buy</a>
+                        <a class="btn btn-success m-1 w-100" href="/forex-wallet/sell-forex" role="button">Sell</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graph -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-header">Data Graph</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <!-- Go to chart.js for this -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Owned currencies -->
+<h5>Owned Forex Assets</h5>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Currency</th>
+            <th scope="col">Amount Owned</th>
+            <th scope="col">Value</th>
+            <th scope="col">Profit/Loss</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>United States Dollar (USD)</td>
+            <td>$100</td>
+            <td>£75</td>
+            <td>10%</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Currency transactions -->
+<h5>Forex Asset Transactions</h5>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Currency</th>
+            <th scope="col">Amount purchased/sold</th>
+            <th scope="col">Purchase/Sell price</th>
+            <th scope="col">Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">United States Dollar (USD)</th>
+            <td>$100</td>
+            <td>£75</td>
+            <td>10/11/2022</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}

@@ -24,7 +24,7 @@
                 <span class="navbar-toggler-icon" data-bs-target="#offcanvasExample"></span>
             </button>
 
-            <a class="navbar-brand fw-bold text-uppercase me-auto" href="#">Fintra</a>
+            <a class="navbar-brand fw-bold text-uppercase me-auto" href="/">Fintra</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <div class="text-muted small fw-bold text-uppercase px-3">Core</div>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-3 active">
+                        <a href="/" class="nav-link px-3 active">
                             <span class="me-2">
                                 <i class="bi bi-speedometer2"></i>
                             </span>
@@ -85,30 +85,42 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-3 active">
-                            <span class="me-2">
-                                <i class="bi bi-activity"></i>
-                            </span>
-                            <span>
-                                Tracker
-                            </span>
+                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse" href="#trackerCollapse"
+                            role="button" aria-expanded="false" aria-controls="trackerCollapse">
+                            <span class="me-2"><i class="bi bi-activity"></i></span>
+                            <span>Trackers</span>
+                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
                         </a>
+                        <div class="collapse" id="trackerCollapse">
+                            <div>
+                                <ul class="navbar-nav ps-3">
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/cryptocurrency-tracker">
+                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
+                                            <span>Cryptocurrency</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/forex-tracker">
+                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
+                                            <span>Forex</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/stock-tracker">
+                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
+                                            <span>Stocks</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
                     <li>
                         <div class="text-muted small fw-bold text-uppercase px-3">Wallets</div>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-3 active">
-                            <span class="me-2">
-                                <i class="bi bi-wallet2"></i>
-                            </span>
-                            <span>
-                                Main
-                            </span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="nav-link px-3 active">
+                        <a href="/cryptocurrency-wallet" class="nav-link px-3 active">
                             <span class="me-2">
                                 <i class="bi bi-currency-bitcoin"></i>
                             </span>
@@ -118,7 +130,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-3 active">
+                        <a href="/forex-wallet" class="nav-link px-3 active">
                             <span class="me-2">
                                 <i class="bi bi-currency-pound"></i>
                             </span>
@@ -128,7 +140,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-3 active">
+                        <a href="/stock-wallet" class="nav-link px-3 active">
                             <span class="me-2">
                                 <i class="bi bi-graph-up"></i>
                             </span>
@@ -138,22 +150,63 @@
                         </a>
                     </li>
                     <li>
-                        <div class="text-muted small fw-bold text-uppercase px-3">Interface</div>
+                        <div class="text-muted small fw-bold text-uppercase px-3">Transactions</div>
                     </li>
                     <li>
-                        <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#collapseExample"
-                            role="button" aria-expanded="false" aria-controls="collapseExample">
-                            <span class="me-2"><i class="bi bi-layout-split"></i></span>
-                            <span>Layouts</span>
+                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse" href="#buyAssetsCollapse"
+                            role="button" aria-expanded="false" aria-controls="buyAssetsCollapse">
+                            <span class="me-2"><i class="bi bi-cart"></i></span>
+                            <span>Buy Assets</span>
                             <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
                         </a>
-                        <div class="collapse" id="collapseExample">
+                        <div class="collapse" id="buyAssetsCollapse">
                             <div>
                                 <ul class="navbar-nav ps-3">
                                     <li>
-                                        <a class="nav-link px-3" href="#">
-                                            <span class="me-2"><i class="bi bi-layout-split"></i></span>
-                                            <span>Nested link</span>
+                                        <a class="nav-link px-3 active"
+                                            href="/cryptocurrency-wallet/buy-cryptocurrency">
+                                            <span>Cryptocurrency</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/forex-wallet/buy-forex">
+                                            <span>Forex</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/stock-wallet/buy-stock">
+                                            <span>Stocks</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse"
+                            href="#sellAssetsCollapse" role="button" aria-expanded="false"
+                            aria-controls="sellAssetsCollapse">
+                            <span class="me-2"><i class="bi bi-cash-stack"></i></span>
+                            <span>Sell Assets</span>
+                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
+                        </a>
+                        <div class="collapse" id="sellAssetsCollapse">
+                            <div>
+                                <ul class="navbar-nav ps-3">
+                                    <li>
+                                        <a class="nav-link px-3 active"
+                                            href="/cryptocurrency-wallet/sell-cryptocurrency">
+                                            <span>Cryptocurrency</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/forex-wallet/sell-forex">
+                                            <span>Forex</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link px-3 active" href="/stock-wallet/sell-stock">
+                                            <span>Stocks</span>
                                         </a>
                                     </li>
                                 </ul>
