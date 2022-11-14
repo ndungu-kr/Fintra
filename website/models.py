@@ -119,6 +119,8 @@ class CryptocurrencyTransaction(db.Model):
         db.Integer, db.ForeignKey("cryptocurrency.id"), nullable=False
     )
     crypto_amount = db.Column(db.NUMERIC, nullable=False)
+    monetary_amount = db.Column(db.DECIMAL, nullable=False)
+    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
     rate = db.Column(db.NUMERIC, nullable=False)
 
     def __repr__(self):
@@ -134,6 +136,8 @@ class ForexTransaction(db.Model):
     )  # check here if relationships are messed up
     currency_id = db.Column(db.Integer, db.ForeignKey("currency.id"), nullable=False)
     currency_amount = db.Column(db.NUMERIC, nullable=False)
+    monetary_amount = db.Column(db.DECIMAL, nullable=False)
+    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
     rate = db.Column(db.NUMERIC, nullable=False)
 
     def __repr__(self):
@@ -149,6 +153,8 @@ class StockTransaction(db.Model):
     )  # check here if relationships are messed up
     stock_id = db.Column(db.Integer, db.ForeignKey("stock.id"), nullable=False)
     stock_amount = db.Column(db.NUMERIC, nullable=False)
+    monetary_amount = db.Column(db.DECIMAL, nullable=False)
+    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
     rate = db.Column(db.NUMERIC, nullable=False)
 
     def __repr__(self):
