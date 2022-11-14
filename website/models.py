@@ -64,6 +64,7 @@ class Currency(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     value = db.Column(db.DECIMAL, nullable=False)
+    code = db.Column(db.String(8), nullable=False)
     symbol = db.Column(db.String(5), nullable=False)
     transactions = db.relationship("ForexTransaction", backref="currency", lazy=True)
 
