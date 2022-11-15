@@ -51,29 +51,29 @@ class Wallet(db.Model):
 #     return f"Deposit('{self.id}', '{self.date}')"
 
 
-class Cryptocurrency(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    # value = db.Column(db.DECIMAL, nullable=False)
-    transactions = db.relationship(
-        "CryptocurrencyTransaction", backref="cryptocurrency", lazy=True
-    )
+# class Cryptocurrency(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(200), nullable=False)
+#     # value = db.Column(db.DECIMAL, nullable=False)
+#     transactions = db.relationship(
+#         "CryptocurrencyTransaction", backref="cryptocurrency", lazy=True
+#     )
 
 
-class Currency(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    # value = db.Column(db.DECIMAL, nullable=False)
-    code = db.Column(db.String(8), nullable=False)
-    symbol = db.Column(db.String(5), nullable=False)
-    transactions = db.relationship("ForexTransaction", backref="currency", lazy=True)
+# class Currency(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(200), nullable=False)
+#     # value = db.Column(db.DECIMAL, nullable=False)
+#     code = db.Column(db.String(8), nullable=False)
+#     symbol = db.Column(db.String(5), nullable=False)
+#     transactions = db.relationship("ForexTransaction", backref="currency", lazy=True)
 
 
-class Stock(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    # value = db.Column(db.DECIMAL, nullable=False)
-    transactions = db.relationship("StockTransaction", backref="stock", lazy=True)
+# class Stock(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(200), nullable=False)
+#     # value = db.Column(db.DECIMAL, nullable=False)
+#     transactions = db.relationship("StockTransaction", backref="stock", lazy=True)
 
 
 class CryptoWallet(db.Model):
@@ -109,54 +109,54 @@ class StockWallet(db.Model):
     balance = db.Column(db.DECIMAL, nullable=False, default=0)
 
 
-class CryptocurrencyTransaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    description = db.Column(db.Text, nullable=False)
-    crypto_wallet_id = db.Column(
-        db.Integer, db.ForeignKey("crypto_wallet.id"), nullable=False
-    )  # check here if relationships are messed up
-    cryptocurrency_id = db.Column(
-        db.Integer, db.ForeignKey("cryptocurrency.id"), nullable=False
-    )
-    crypto_amount = db.Column(db.NUMERIC, nullable=False)
-    monetary_amount = db.Column(db.DECIMAL, nullable=False)
-    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
-    rate = db.Column(db.NUMERIC, nullable=False)
+# class CryptocurrencyTransaction(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+#     description = db.Column(db.Text, nullable=False)
+#     crypto_wallet_id = db.Column(
+#         db.Integer, db.ForeignKey("crypto_wallet.id"), nullable=False
+#     )  # check here if relationships are messed up
+#     cryptocurrency_id = db.Column(
+#         db.Integer, db.ForeignKey("cryptocurrency.id"), nullable=False
+#     )
+#     crypto_amount = db.Column(db.NUMERIC, nullable=False)
+#     monetary_amount = db.Column(db.DECIMAL, nullable=False)
+#     bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
+#     rate = db.Column(db.NUMERIC, nullable=False)
 
-    def __repr__(self):
-        return f"Deposit('{self.id}', '{self.date}')"
-
-
-class ForexTransaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    description = db.Column(db.Text, nullable=False)
-    forex_wallet_id = db.Column(
-        db.Integer, db.ForeignKey("forex_wallet.id"), nullable=False
-    )  # check here if relationships are messed up
-    currency_id = db.Column(db.Integer, db.ForeignKey("currency.id"), nullable=False)
-    currency_amount = db.Column(db.NUMERIC, nullable=False)
-    monetary_amount = db.Column(db.DECIMAL, nullable=False)
-    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
-    rate = db.Column(db.NUMERIC, nullable=False)
-
-    def __repr__(self):
-        return f"Deposit('{self.id}', '{self.date}')"
+#     def __repr__(self):
+#         return f"Deposit('{self.id}', '{self.date}')"
 
 
-class StockTransaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    description = db.Column(db.Text, nullable=False)
-    stock_wallet_id = db.Column(
-        db.Integer, db.ForeignKey("stock_wallet.id"), nullable=False
-    )  # check here if relationships are messed up
-    stock_id = db.Column(db.Integer, db.ForeignKey("stock.id"), nullable=False)
-    stock_amount = db.Column(db.NUMERIC, nullable=False)
-    monetary_amount = db.Column(db.DECIMAL, nullable=False)
-    bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
-    rate = db.Column(db.NUMERIC, nullable=False)
+# class ForexTransaction(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+#     description = db.Column(db.Text, nullable=False)
+#     forex_wallet_id = db.Column(
+#         db.Integer, db.ForeignKey("forex_wallet.id"), nullable=False
+#     )  # check here if relationships are messed up
+#     currency_id = db.Column(db.Integer, db.ForeignKey("currency.id"), nullable=False)
+#     currency_amount = db.Column(db.NUMERIC, nullable=False)
+#     monetary_amount = db.Column(db.DECIMAL, nullable=False)
+#     bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
+#     rate = db.Column(db.NUMERIC, nullable=False)
 
-    def __repr__(self):
-        return f"Deposit('{self.id}', '{self.date}')"
+#     def __repr__(self):
+#         return f"Deposit('{self.id}', '{self.date}')"
+
+
+# class StockTransaction(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+#     description = db.Column(db.Text, nullable=False)
+#     stock_wallet_id = db.Column(
+#         db.Integer, db.ForeignKey("stock_wallet.id"), nullable=False
+#     )  # check here if relationships are messed up
+#     stock_id = db.Column(db.Integer, db.ForeignKey("stock.id"), nullable=False)
+#     stock_amount = db.Column(db.NUMERIC, nullable=False)
+#     monetary_amount = db.Column(db.DECIMAL, nullable=False)
+#     bos = db.Column(db.BOOLEAN, nullable=False)  # buy = 1 and sell = 0
+#     rate = db.Column(db.NUMERIC, nullable=False)
+
+#     def __repr__(self):
+#         return f"Deposit('{self.id}', '{self.date}')"
