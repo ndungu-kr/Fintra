@@ -1,5 +1,15 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User, Wallet, CryptoWallet, ForexWallet, StockWallet
+from .models import (
+    User,
+    Wallet,
+    CryptoWallet,
+    ForexWallet,
+    StockWallet,
+    WalletBalance,
+    CryptoWalletBalance,
+    ForexWalletBalance,
+    StockWalletBalance,
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -55,6 +65,7 @@ def sign_up():
         elif len(password1) < 7:
             flash("Password must be at least 7 characters", category="error")
         else:
+            # creating a new user
             new_user = User(
                 email=email,
                 first_name=first_name,
@@ -64,7 +75,7 @@ def sign_up():
             db.session.commit()
             new_user_id = new_user.id
 
-            # creating all wallets for new users
+            # creating all wallets for a new user
             create_wallets(new_user_id)
 
             login_user(new_user, remember=True)
@@ -75,19 +86,44 @@ def sign_up():
 
 
 def create_wallets(new_user_id):
+    # creating main wallet and initial balance
     new_wallet = Wallet(user_id=new_user_id)
     db.session.add(new_wallet)
     db.session.commit()
     new_wallet_id = new_wallet.id
 
+    new_wallet_balance = WalletBalance(wallet_id=new_wallet_id)
+    db.session.add(new_wallet_balance)
+    db.session.commit()
+
+    # creating crypto wallet and initial balance
     new_crypto_wallet = CryptoWallet(wallet_id=new_wallet_id)
     db.session.add(new_crypto_wallet)
     db.session.commit()
+    new_crypto_wallet_id = new_crypto_wallet.id
 
+    new_crypto_wallet_balance = CryptoWalletBalance(
+        crypto_wallet_id=new_crypto_wallet_id
+    )
+    db.session.add(new_crypto_wallet_balance)
+    db.session.commit()
+
+    # creating forex wallet and initial balance
     new_forex_wallet = ForexWallet(wallet_id=new_wallet_id)
     db.session.add(new_forex_wallet)
     db.session.commit()
+    new_forex_wallet_id = new_forex_wallet.id
 
+    new_forex_wallet_balance = ForexWalletBalance(forex_wallet_id=new_forex_wallet_id)
+    db.session.add(new_forex_wallet_balance)
+    db.session.commit()
+
+    # creating stock wallet and initial balance
     new_stock_wallet = StockWallet(wallet_id=new_wallet_id)
     db.session.add(new_stock_wallet)
+    db.session.commit()
+    new_stock_wallet_id = new_stock_wallet.id
+
+    new_stock_wallet_balance = StockWalletBalance(stock_wallet_id=new_stock_wallet_id)
+    db.session.add(new_stock_wallet_balance)
     db.session.commit()
