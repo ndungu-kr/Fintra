@@ -38,22 +38,6 @@ class WalletBalance(db.Model):
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
-# class Cryptocurrency(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(200), nullable=False)
-
-
-# class Currency(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(200), nullable=False)
-#     symbol = db.Column(db.String(5), nullable=False)
-
-
-# class Stock(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(200), nullable=False)
-
-
 class CryptoWallet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     wallet_id = db.Column(
@@ -68,6 +52,9 @@ class CryptoWallet(db.Model):
     crytocurrency_sells = db.relationship(
         "CryptocurrencySell", backref="crytocurrency_sells", lazy=True
     )
+    crytocurrency_amounts = db.relationship(
+        "CryptocurrencyAmount", backref="crytocurrency_amounts", lazy=True
+    )
 
 
 class ForexWallet(db.Model):
@@ -80,6 +67,9 @@ class ForexWallet(db.Model):
         "ForexWalletBalance", backref="forex_wallet_balances", lazy=True
     )
     forex_sells = db.relationship("ForexSell", backref="forex_sells", lazy=True)
+    currency_amounts = db.relationship(
+        "CurrencyAmount", backref="currency_amounts", lazy=True
+    )
 
 
 class StockWallet(db.Model):
@@ -92,11 +82,14 @@ class StockWallet(db.Model):
         "StockWalletBalance", backref="stock_wallet_balances", lazy=True
     )
     stock_sells = db.relationship("StockSell", backref="stock_sells", lazy=True)
+    stock_amounts = db.relationship("StockAmount", backref="stock_amounts", lazy=True)
 
 
 class CryptocurrencyBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cryptocurrency_code = db.Column(db.String, nullable=False)
+    cryptocurrency_code = db.Column(
+        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
+    )
     crypto_wallet_id = db.Column(
         db.Integer, db.ForeignKey("crypto_wallet.id"), nullable=False
     )
@@ -123,7 +116,9 @@ class CryptoWalletBalance(db.Model):
 
 class CryptocurrencySell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cryptocurrency_code = db.Column(db.String, nullable=False)
+    cryptocurrency_code = db.Column(
+        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
+    )
     crypto_wallet_id = db.Column(
         db.Integer, db.ForeignKey("crypto_wallet.id"), nullable=False
     )
@@ -139,7 +134,7 @@ class CryptocurrencySell(db.Model):
 
 class ForexBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    currency_code = db.Column(db.String, nullable=False)
+    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
     forex_wallet_id = db.Column(
         db.Integer, db.ForeignKey("forex_wallet.id"), nullable=False
     )
@@ -166,7 +161,7 @@ class ForexWalletBalance(db.Model):
 
 class ForexSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    currency_code = db.Column(db.String, nullable=False)
+    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
     forex_wallet_id = db.Column(
         db.Integer, db.ForeignKey("forex_wallet.id"), nullable=False
     )
@@ -182,7 +177,7 @@ class ForexSell(db.Model):
 
 class StockBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String, nullable=False)
+    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
     stock_wallet_id = db.Column(
         db.Integer, db.ForeignKey("stock_wallet.id"), nullable=False
     )
@@ -209,7 +204,7 @@ class StockWalletBalance(db.Model):
 
 class StockSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String, nullable=False)
+    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
     stock_wallet_id = db.Column(
         db.Integer, db.ForeignKey("stock_wallet.id"), nullable=False
     )
@@ -221,3 +216,76 @@ class StockSell(db.Model):
 
     def __repr__(self):
         return f"StockSell('{self.stock_code}', '{self.stock_amount_sold}', '{self.monetary_amount_withdrawn}', '{self.description}', '{self.date}')"
+
+
+class Cryptocurrency(db.Model):
+    code = db.Column(db.String(5), primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    current_price = db.Column(db.DECIMAL, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    crytocurrency_purchased = db.relationship(
+        "CryptocurrencyBuy", backref="crytocurrency_purchased", lazy=True
+    )
+    crytocurrency_sold = db.relationship(
+        "CryptocurrencySell", backref="crytocurrency_sold", lazy=True
+    )
+    crytocurrency_asset_amounts = db.relationship(
+        "CryptocurrencyAmount", backref="crytocurrency_asset_amounts", lazy=True
+    )
+
+
+class Currency(db.Model):
+    code = db.Column(db.String(3), primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    symbol = db.Column(db.String(5), nullable=False)
+    current_price = db.Column(db.DECIMAL, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    forex_purchased = db.relationship("ForexBuy", backref="forex_purchased", lazy=True)
+    forex_sold = db.relationship("ForexSell", backref="forex_sold", lazy=True)
+    currency_asset_amounts = db.relationship(
+        "CurrencyAmount", backref="currency_asset_amounts", lazy=True
+    )
+
+
+class Stock(db.Model):
+    code = db.Column(db.String(5), primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    current_price = db.Column(db.DECIMAL, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    stock_purchased = db.relationship("StockBuy", backref="stock_purchased", lazy=True)
+    stock_sold = db.relationship("StockSell", backref="stock_sold", lazy=True)
+    stock_asstet_amounts = db.relationship(
+        "StockAmount", backref="stock_asset_amounts", lazy=True
+    )
+
+
+class CryptocurrencyAmount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cryptocurrency_code = db.Column(
+        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
+    )
+    crypto_wallet_id = db.Column(
+        db.Integer, db.ForeignKey("crypto_wallet.id"), nullable=False
+    )
+    quantity = db.Column(db.NUMERIC, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class CurrencyAmount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    forex_wallet_id = db.Column(
+        db.Integer, db.ForeignKey("forex_wallet.id"), nullable=False
+    )
+    quantity = db.Column(db.NUMERIC, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class StockAmount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
+    stock_wallet_id = db.Column(
+        db.Integer, db.ForeignKey("stock_wallet.id"), nullable=False
+    )
+    quantity = db.Column(db.NUMERIC, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
