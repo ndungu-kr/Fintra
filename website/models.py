@@ -229,8 +229,8 @@ class Cryptocurrency(db.Model):
     crytocurrency_sold = db.relationship(
         "CryptocurrencySell", backref="crytocurrency_sold", lazy=True
     )
-    crytocurrency_amounts = db.relationship(
-        "CryptocurrencyAmount", backref="crytocurrency_amounts", lazy=True
+    crytocurrency_asset_amounts = db.relationship(
+        "CryptocurrencyAmount", backref="crytocurrency_asset_amounts", lazy=True
     )
 
 
@@ -242,8 +242,8 @@ class Currency(db.Model):
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     forex_purchased = db.relationship("ForexBuy", backref="forex_purchased", lazy=True)
     forex_sold = db.relationship("ForexSell", backref="forex_sold", lazy=True)
-    currency_amounts = db.relationship(
-        "CurrencyAmount", backref="currency_amounts", lazy=True
+    currency_asset_amounts = db.relationship(
+        "CurrencyAmount", backref="currency_asset_amounts", lazy=True
     )
 
 
@@ -254,7 +254,9 @@ class Stock(db.Model):
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     stock_purchased = db.relationship("StockBuy", backref="stock_purchased", lazy=True)
     stock_sold = db.relationship("StockSell", backref="stock_sold", lazy=True)
-    stock_amounts = db.relationship("StockAmount", backref="stock_amounts", lazy=True)
+    stock_asstet_amounts = db.relationship(
+        "StockAmount", backref="stock_asset_amounts", lazy=True
+    )
 
 
 class CryptocurrencyAmount(db.Model):
