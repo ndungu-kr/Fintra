@@ -2,6 +2,18 @@ import requests
 from os import path, listdir, getcwd
 from datetime import datetime, timezone, timedelta
 from . import generate_file
+import threading
+
+
+def start_csv_check_loop():
+    def generate_csv_loop():
+        # Having the function here runs it immediatly the app is started
+        crypto_import()
+        # Schedule the function to run every 7 minutes
+        threading.Timer(420.0, generate_csv_loop).start()
+
+    # Start the CSV generation loop on a separate thread
+    threading.Thread(target=generate_csv_loop).start()
 
 
 def crypto_import():
@@ -22,9 +34,12 @@ def crypto_import():
     crypto_file_list = listdir(crypto_folder_path)
 
     # removing string from file names to make datetime objs
-    crypto_file_times = [s.strip("top_cryptocurrencies ") for s in crypto_file_list]
+    crypto_file_times_unedited = [
+        s.strip("top_cryptocurrencies ") for s in crypto_file_list
+    ]
+    crypto_file_times_in_string = [s.strip(".csv") for s in crypto_file_times_unedited]
     crypto_file_times = [
-        datetime.strptime(d, "%Y-%m-%d %H%M%S") for d in crypto_file_times
+        datetime.strptime(d, "%Y-%m-%d %H%M%S") for d in crypto_file_times_in_string
     ]
 
     # finding the latest file in the folder
@@ -32,27 +47,30 @@ def crypto_import():
         latest_file_timestamp = max(crypto_file_times)
     else:
         latest_file_timestamp = None
+    print("###### LATEST CRYPTO FOLDER TIME ######", latest_file_timestamp)
 
     current_time = datetime.now(timezone.utc)
 
-    # Removing milliseconds from time for csv
+    # Removing milliseconds from time for naming csv
     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
-
     filename = f"top_cryptocurrencies {formatted_time}.csv"
+
+    # Checking time at the refresh/cutoff time - 7 mins
     current_refresh_time = current_time - timedelta(minutes=7)
+    current_refresh_time = current_refresh_time.replace(microsecond=0, tzinfo=None)
 
     # Checking if latest CSV file is older than refresh refresh time
     if latest_file_timestamp is None:
         print("CSV file does not exist. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, crypto_folder_path)
+        crypto_data_to_csv(url, headers, filename)
     elif latest_file_timestamp < current_refresh_time:
         print("CSV file is older than 7 minutes. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, crypto_folder_path)
+        crypto_data_to_csv(url, headers, filename)
     else:
         print("CSV file is up-to-date. Exiting script...")
 
 
-def crypto_data_to_csv(url, headers, crypto_folder_path):
+def crypto_data_to_csv(url, headers, filename):
     # Retreiving data from API using a GET request
     response = requests.get(url, headers=headers)
     data = response.json()
@@ -74,4 +92,4 @@ def crypto_data_to_csv(url, headers, crypto_folder_path):
         )
 
     # Writing the cryptocurrency data onto a CSV file
-    generate_file.create_crypto_csv(cryptos, crypto_folder_path)
+    generate_file.create_crypto_csv(cryptos, filename)
