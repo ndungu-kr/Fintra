@@ -2,9 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
-
-# from .cryptocurrency_import import crypto_import
-# from . import data_insert
+from website.cryptocurrency_import import start_csv_check_loop
 
 
 db = SQLAlchemy()
@@ -36,4 +34,5 @@ def create_app():
     def load_user(id):
         return User.query.get(int(id))
 
+    start_csv_check_loop()
     return app

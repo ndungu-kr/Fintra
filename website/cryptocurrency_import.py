@@ -4,6 +4,8 @@ from datetime import datetime, timezone, timedelta
 from . import generate_file
 import threading
 
+# from . import data_insert
+
 
 def start_csv_check_loop():
     def generate_csv_loop():
@@ -55,6 +57,9 @@ def crypto_import():
     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
     filename = f"top_cryptocurrencies {formatted_time}.csv"
 
+    # setting csv save location
+    filename_path = path.join(crypto_folder_path, filename)
+
     # Checking time at the refresh/cutoff time - 7 mins
     current_refresh_time = current_time - timedelta(minutes=7)
     current_refresh_time = current_refresh_time.replace(microsecond=0, tzinfo=None)
@@ -62,15 +67,15 @@ def crypto_import():
     # Checking if latest CSV file is older than refresh refresh time
     if latest_file_timestamp is None:
         print("CSV file does not exist. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, filename)
+        crypto_data_to_csv(url, headers, filename_path)
     elif latest_file_timestamp < current_refresh_time:
         print("CSV file is older than 7 minutes. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, filename)
+        crypto_data_to_csv(url, headers, filename_path)
     else:
         print("CSV file is up-to-date. Exiting script...")
 
 
-def crypto_data_to_csv(url, headers, filename):
+def crypto_data_to_csv(url, headers, filename_path):
     # Retreiving data from API using a GET request
     response = requests.get(url, headers=headers)
     data = response.json()
@@ -92,4 +97,4 @@ def crypto_data_to_csv(url, headers, filename):
         )
 
     # Writing the cryptocurrency data onto a CSV file
-    generate_file.create_crypto_csv(cryptos, filename)
+    generate_file.create_crypto_csv(cryptos, filename_path)
