@@ -2,6 +2,7 @@ import requests
 from os import path, listdir, getcwd
 from datetime import datetime, timezone, timedelta
 from . import generate_file
+import time
 import threading
 
 # from . import data_insert
@@ -9,13 +10,18 @@ import threading
 
 def start_csv_check_loop():
     def generate_csv_loop():
-        # Having the function here runs it immediatly the app is started
-        crypto_import()
-        # Schedule the function to run every 7 minutes
-        threading.Timer(420.0, generate_csv_loop).start()
+        while True:
+            crypto_import()
+            time.sleep(15)
+
+        # crypto_import()
+        # # Schedule the function to run every 1 minutes
+        # threading.Timer(15.0, generate_csv_loop).start()
 
     # Start the CSV generation loop on a separate thread
-    threading.Thread(target=generate_csv_loop).start()
+    generate_csv_loop_thread = threading.Thread(target=generate_csv_loop)
+    generate_csv_loop_thread.daemon = True
+    generate_csv_loop_thread.start()
 
 
 def crypto_import():
@@ -52,6 +58,7 @@ def crypto_import():
     print("###### LATEST CRYPTO FOLDER TIME ######", latest_file_timestamp)
 
     current_time = datetime.now(timezone.utc)
+    print("##### CURRENT TIME #####", current_time)
 
     # Removing milliseconds from time for naming csv
     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
