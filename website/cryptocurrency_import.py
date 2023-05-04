@@ -12,7 +12,7 @@ def start_csv_check_loop():
     def generate_csv_loop():
         while True:
             crypto_import()
-            time.sleep(15)
+            time.sleep(60)
 
         # crypto_import()
         # # Schedule the function to run every 1 minutes
