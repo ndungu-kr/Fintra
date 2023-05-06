@@ -5,8 +5,6 @@ from . import generate_file
 import time
 import threading
 
-# from . import data_insert
-
 
 def start_csv_check_loop():
     def generate_csv_loop():
@@ -41,7 +39,7 @@ def crypto_import():
     # getting a list of crypto csvs
     crypto_file_list = listdir(crypto_folder_path)
 
-    # removing string from file names to make datetime objs
+    # removing string from file names to make datetime objs, MAKE SURE ONLY CSV IN CRYPTO CSV FILE
     crypto_file_times_unedited = [
         s.strip("top_cryptocurrencies ") for s in crypto_file_list
     ]
@@ -53,6 +51,14 @@ def crypto_import():
     # finding the latest file in the folder
     if crypto_file_times:
         latest_file_timestamp = max(crypto_file_times)
+        latest_cryptocurrency_file = path.join(
+            crypto_folder_path,
+            (
+                "top_cryptocurrencies "
+                + latest_file_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                + ".csv"
+            ),
+        )
     else:
         latest_file_timestamp = None
     print("###### LATEST CRYPTO FOLDER TIME ######", latest_file_timestamp)
@@ -74,15 +80,17 @@ def crypto_import():
     # Checking if latest CSV file is older than refresh refresh time
     if latest_file_timestamp is None:
         print("CSV file does not exist. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, filename_path)
+        latest_cryptocurrency_file = path.join(crypto_folder_path, filename)
+        crypto_data_to_csv(url, headers, filename_path, latest_cryptocurrency_file)
     elif latest_file_timestamp < current_refresh_time:
         print("CSV file is older than 7 minutes. Calling API to create new CSV file...")
-        crypto_data_to_csv(url, headers, filename_path)
+        latest_cryptocurrency_file = path.join(crypto_folder_path, filename)
+        crypto_data_to_csv(url, headers, filename_path, latest_cryptocurrency_file)
     else:
         print("CSV file is up-to-date. Exiting script...")
 
 
-def crypto_data_to_csv(url, headers, filename_path):
+def crypto_data_to_csv(url, headers, filename_path, latest_cryptocurrency_file):
     # Retreiving data from API using a GET request
     response = requests.get(url, headers=headers)
     data = response.json()
@@ -102,6 +110,9 @@ def crypto_data_to_csv(url, headers, filename_path):
                 "last_updated": timestamp,
             }
         )
-
+    print(
+        "########## latest_cryptocurrency_file #############",
+        latest_cryptocurrency_file,
+    )
     # Writing the cryptocurrency data onto a CSV file
-    generate_file.create_crypto_csv(cryptos, filename_path)
+    generate_file.create_crypto_csv(cryptos, filename_path, latest_cryptocurrency_file)

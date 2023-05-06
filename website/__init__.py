@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
-from website.cryptocurrency_import import start_csv_check_loop
 
 
 db = SQLAlchemy()
