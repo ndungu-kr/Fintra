@@ -219,7 +219,8 @@ class StockSell(db.Model):
 
 
 class Cryptocurrency(db.Model):
-    code = db.Column(db.String(5), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(5), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -235,7 +236,8 @@ class Cryptocurrency(db.Model):
 
 
 class Currency(db.Model):
-    code = db.Column(db.String(3), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(3))
     name = db.Column(db.String(200), nullable=False)
     symbol = db.Column(db.String(5))
     current_price = db.Column(db.DECIMAL, nullable=False, default=0)
@@ -248,7 +250,8 @@ class Currency(db.Model):
 
 
 class Stock(db.Model):
-    code = db.Column(db.String(5), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(5))
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

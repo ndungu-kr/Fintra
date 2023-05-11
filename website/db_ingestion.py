@@ -1,66 +1,69 @@
 import csv
-
 from .models import Cryptocurrency
 from sqlalchemy import create_engine
 from datetime import datetime
+from re import sub
+from decimal import Decimal
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import sessionmaker
 
 
 def convert_time(last_updated):
     date_format = "%Y-%m-%dT%H:%M:%S"
     last_updated = datetime.strptime(last_updated, date_format)
-    print(last_updated)
     return last_updated
 
 
 def data_insert(latest_cryptocurrency_file):
-    # Import data from the cryptocurrencies CSV file
-    engine = create_engine("sqlite:///database.db")
+    # Creating an engine and session
     try:
-        with open(latest_cryptocurrency_file, newline="") as csvfile:
-            # skip the header row
-            next(csvfile)
+        engine = create_engine("sqlite:///./instance/database.db")
+        Session = sessionmaker(bind=engine)
+        session = Session()
+    except OperationalError as e:
+        print(f"Error connecting to the database: {e}")
+
+    try:
+        with open(latest_cryptocurrency_file, "r", newline="") as csvfile:
             reader = csv.DictReader(csvfile)
             added_counter = 0
             updated_counter = 0
-            print("We are here")
+
             for row in reader:
                 code = row["code"]
                 name = row["name"]
-                current_price = int(row["current_price"])
-                last_updated = row["last_updated"]
-                convert_time(last_updated)
-                crypto_exists = Cryptocurrency.query.filter_by(code=code).first()
-                if crypto_exists:
-                    crypto_exists.price = current_price
-                    crypto_exists.last_updated = last_updated
-                    crypto_exists.commit()
+                current_price = row["current_price"]
+                # Removing any character that is not an int or ".", and making the str decimal
+                current_price = Decimal(sub(r"[^\d.]", "", current_price))
+                last_updated = convert_time(row["last_updated"])
+
+                crypto_code_exists = (
+                    session.query(Cryptocurrency).filter_by(code=code).first()
+                )
+                crypto_name_exists = (
+                    session.query(Cryptocurrency).filter_by(name=name).first()
+                )
+
+                # if the crypto exists in db, update, if not add to db
+                # some cryptos share the code, hence both checks below:
+                if crypto_code_exists and crypto_name_exists:
+                    crypto_code_exists.price = current_price
+                    crypto_code_exists.last_updated = last_updated
                     updated_counter = updated_counter + 1
                 else:
                     new_query = Cryptocurrency(
+                        code=code,
                         name=name,
                         current_price=current_price,
                         last_updated=last_updated,
                     )
-                    new_query.add()
+                    session.add(new_query)
                     added_counter = added_counter + 1
+
+            session.commit()
+            session.close()
 
             print(added_counter, " New Cryptocurrencies added")
             print(updated_counter, " Cryptocurrencies updated")
     except:
-        print("Crypto CSV db transfer failed")
-
-
-# I want it to check the db first using the code column
-# if the code exists
-# update the current row
-# if it doesnt exist
-# add
-
-
-# # Import data from the currencies CSV file
-# with open("currencies.csv", "r") as csvfile:
-#     reader = csv.DictReader(csvfile)
-#     currencies = list(reader)
-# # Insert data into Currency
-# db.session.bulk_insert_mappings(Currency, currencies)
-# db.session.commit()
+        print("No changes made to db")

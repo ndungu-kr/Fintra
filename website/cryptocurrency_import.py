@@ -106,7 +106,7 @@ def crypto_data_to_csv(url, headers, filename_path, latest_cryptocurrency_file):
             {
                 "code": crypto["symbol"],
                 "name": crypto["name"],
-                "current_price": crypto["quote"]["USD"]["price"],
+                "current_price": f"${crypto['quote']['USD']['price']}",
                 "last_updated": timestamp,
             }
         )
