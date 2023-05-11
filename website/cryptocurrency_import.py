@@ -18,6 +18,7 @@ def start_csv_check_loop():
 
     # Start the CSV generation loop on a separate thread
     generate_csv_loop_thread = threading.Thread(target=generate_csv_loop)
+    # Making daemon to allow crtl + c stop to app
     generate_csv_loop_thread.daemon = True
     generate_csv_loop_thread.start()
 
@@ -110,9 +111,14 @@ def crypto_data_to_csv(url, headers, filename_path, latest_cryptocurrency_file):
                 "last_updated": timestamp,
             }
         )
+
+    # Do something else with cryptos
+    # Write it in db
+
     print(
-        "########## latest_cryptocurrency_file #############",
+        "########## Crypto file created at #############",
         latest_cryptocurrency_file,
     )
+
     # Writing the cryptocurrency data onto a CSV file
     generate_file.create_crypto_csv(cryptos, filename_path, latest_cryptocurrency_file)

@@ -33,7 +33,7 @@ def data_insert(latest_cryptocurrency_file):
                 code = row["code"]
                 name = row["name"]
                 current_price = row["current_price"]
-                # Removing any character that is not an int or ".", and making the str decimal
+                # Removing any character that is not an int or ".", and then making the str decimal
                 current_price = Decimal(sub(r"[^\d.]", "", current_price))
                 last_updated = convert_time(row["last_updated"])
 
