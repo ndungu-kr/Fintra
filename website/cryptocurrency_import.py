@@ -2,25 +2,6 @@ import requests
 from os import path, listdir, getcwd
 from datetime import datetime, timezone, timedelta
 from . import generate_file
-import time
-import threading
-
-
-def start_csv_check_loop():
-    def generate_csv_loop():
-        while True:
-            crypto_import()
-            time.sleep(60)
-
-        # crypto_import()
-        # # Schedule the function to run every 1 minutes
-        # threading.Timer(15.0, generate_csv_loop).start()
-
-    # Start the CSV generation loop on a separate thread
-    generate_csv_loop_thread = threading.Thread(target=generate_csv_loop)
-    # Making daemon to allow crtl + c stop to app
-    generate_csv_loop_thread.daemon = True
-    generate_csv_loop_thread.start()
 
 
 def crypto_import():

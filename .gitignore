@@ -1,3 +1,4 @@
 *.pyc
 .env
 crypto_data
+currency_data

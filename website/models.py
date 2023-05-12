@@ -237,10 +237,10 @@ class Cryptocurrency(db.Model):
 
 class Currency(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(3))
+    code = db.Column(db.String(10), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     symbol = db.Column(db.String(5))
-    current_price = db.Column(db.DECIMAL, nullable=False, default=0)
+    current_price = db.Column(db.DECIMAL, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     forex_purchased = db.relationship("ForexBuy", backref="forex_purchased", lazy=True)
     forex_sold = db.relationship("ForexSell", backref="forex_sold", lazy=True)

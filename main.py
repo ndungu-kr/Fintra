@@ -1,10 +1,11 @@
 from website import create_app
-from website.cryptocurrency_import import start_csv_check_loop
+from website.loops import start_crypto_thread, start_currency_thread
 
 app = create_app()
 
 if __name__ == "__main__":
-    start_csv_check_loop()
+    start_crypto_thread()
+    start_currency_thread()
     app.run(
         debug=True, use_reloader=False
     )  # use_reloader=False to prevent the app from running twice
