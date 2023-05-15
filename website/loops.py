@@ -1,7 +1,7 @@
 import threading
 import time
 from website.cryptocurrency_import import crypto_import
-from website.currency_import import currency_import
+from website.currency_import import initial_currency_import, currency_import
 
 
 def start_crypto_thread():
@@ -22,6 +22,10 @@ def start_crypto_thread():
 
 
 def start_currency_thread():
+    # Run the initial currency import to add relevant currencies to DB
+    initial_currency_import()
+
+    # Schedule the currency check to run every 1 minute
     def generate_currency_csv():
         while True:
             currency_import()
