@@ -27,46 +27,53 @@ def initial_currency_import():
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 
-    # Opening csv file to check all initial currencies are in the db
-    with open(csv_file_path, "r", newline="", encoding="utf8") as csvfile:
-        currency_reader = csv.DictReader(csvfile)
-        added_counter = 0
-        # updated_counter = 0
+    try:
+        # Opening csv file to check all initial currencies are in the db
+        with open(csv_file_path, "r", newline="", encoding="utf8") as csvfile:
+            currency_reader = csv.DictReader(csvfile)
+            added_counter = 0
 
-        for row in currency_reader:
-            code = row["code"]
-            name = row["name"]
-            symbol = row["symbol"]
+            for row in currency_reader:
+                code = row["code"]
+                name = row["name"]
+                symbol = row["symbol"]
 
-            currency_code_exists = session.query(Currency).filter_by(code=code).first()
-
-            # if currency code exists then skip
-            if currency_code_exists:
-                pass
-            # otherwise add it to the db
-            else:
-                last_updated = datetime.now().replace(microsecond=0).isoformat()
-                date_format = "%Y-%m-%dT%H:%M:%S"
-                last_updated = datetime.strptime(last_updated, date_format)
-                new_query = Currency(
-                    code=code,
-                    name=name,
-                    current_price=None,
-                    symbol=symbol,
-                    last_updated=last_updated,
+                currency_code_exists = (
+                    session.query(Currency).filter_by(code=code).first()
                 )
-                session.add(new_query)
-                added_counter = added_counter + 1
 
-        session.commit()
-        session.close()
+                # if currency code exists then skip
+                if currency_code_exists:
+                    pass
+                # otherwise add it to the db
+                else:
+                    # DATATIMEFUNCTION
+                    last_updated = datetime.now().replace(microsecond=0).isoformat()
+                    date_format = "%Y-%m-%dT%H:%M:%S"
+                    last_updated = datetime.strptime(last_updated, date_format)
+                    new_query = Currency(
+                        code=code,
+                        name=name,
+                        current_price=None,
+                        symbol=symbol,
+                        last_updated=last_updated,
+                    )
+                    session.add(new_query)
+                    added_counter = added_counter + 1
 
-        print(added_counter, " New Currencies added")
-        # print(updated_counter, " Currencies updated")
+            session.commit()
+            session.close()
+
+            print(added_counter, " New Currencies added")
+
+    except Exception as e:
+        print(f"Error inserting data into currency table: {e}")
 
 
 def get_currency_pairs():
-    # check db for codes in currency table
+    from website.models import Currency
+
+    # Read db for codes in currency table
     try:
         engine = create_engine("sqlite:///./instance/database.db")
         Session = sessionmaker(bind=engine)
@@ -74,9 +81,13 @@ def get_currency_pairs():
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 
-    currency_codes = session.query(Currency.code).all()
-    currency_pairs = []
+    try:
+        currency_codes = session.query(Currency.code).all()
+        currency_pairs = []
+    except Exception as e:
+        print(f"Error reading currency table: {e}")
 
+    # Create currency pairs for API request
     for code in currency_codes:
         currency_pairs.append(f"USD/{code[0]}")
 
@@ -86,59 +97,96 @@ def get_currency_pairs():
 
 
 def currency_import():
-    current_time = datetime.now(timezone.utc)
-    # Removing milliseconds from time for naming csv
-    formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
+    api_key = "2a398dea570d408aa9058f71145957a9"
 
+    # Building the API request URL with base currency as USD
+    url = f"https://openexchangerates.org/api/latest.json?app_id={api_key}&show_alternative=1"
+    response = requests.get(url)
+
+    # Parse the response JSON
+    data = response.json()
+
+    # Building the data
+
+    # Extract the timestamp and rates against USD
+    timestamp = data["timestamp"]
+    rates = data["rates"]
+
+    # Fetch the currency names using the CurrencyCodes library
+    currency_codes = list(rates.keys())
+    c = CurrencyCodes()
+    currency_names = [c.get_currency_name(code) for code in currency_codes]
+
+    # Prepare the data
+    currency_data = [["code", "name", "current_price", "last_updated"]]
+
+    from website.models import Currency
+
+    engine = create_engine("sqlite:///./instance/database.db")
+    Session = sessionmaker(bind=engine)
+
+    for code, name in zip(currency_codes, currency_names):
+        current_price = rates[code]
+        # change timestamp to utc datetime object
+        last_updated = datetime.utcfromtimestamp(timestamp).replace(microsecond=0)
+        # change timestamp to isoformat
+        last_updated = last_updated.isoformat()
+        csv_row = [code, name, current_price, last_updated]
+        currency_data.append(csv_row)
+
+        # Check if currency code exists in db
+
+        with Session() as session:
+            currency_code_exists = session.query(Currency).filter_by(code=code).first()
+            # change timestamp to datetime object
+            last_updated = datetime.strptime(last_updated, "%Y-%m-%dT%H:%M:%S")
+            if name is None:
+                name = code
+
+            if currency_code_exists:
+                # Update price and last updated
+                currency_code_exists.current_price = current_price
+                currency_code_exists.last_updated = last_updated
+                session.commit()
+            else:
+                # Add new currency to db
+                new_query = Currency(
+                    code=code,
+                    name=name,
+                    current_price=current_price,
+                    last_updated=last_updated,
+                )
+                session.add(new_query)
+                session.commit()
+
+    # Update AssetLastUpdated table
+    from website.loops import update_last_updated
+
+    asset = "currency"
+    update_last_updated(asset)
+
+    save_to_csv(currency_data)
+
+
+def save_to_csv(currency_data):
     # Acessing prices folder
     prices_folder = "currency_data\prices"
     cwd = path.abspath(getcwd())
     prices_folder_path = path.join(cwd, "website", prices_folder)
 
+    current_time = datetime.now(timezone.utc)
+    # Removing milliseconds from time for naming csv
+    formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
+
     filename = f"currency prices {formatted_time}.csv"
     file_path = os.path.join(prices_folder_path, filename)
 
-    # Check if there is an existing csv file
-    if check_for_csv(current_time, prices_folder_path):
-        pass
-    else:
-        # Set up the API key
-        api_key = "2a398dea570d408aa9058f71145957a9"
+    # Write data to CSV file
+    with open(file_path, "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(currency_data)
 
-        # Building the API request URL with base currency as USD
-        url = f"https://openexchangerates.org/api/latest.json?app_id={api_key}&show_alternative=1"
-        response = requests.get(url)
-
-        # Parse the response JSON
-        data = response.json()
-
-        # Extract the timestamp, base currency, and rates
-        timestamp = data["timestamp"]
-        rates = data["rates"]
-
-        # Fetch the currency names using the CurrencyCodes library
-        currency_codes = list(rates.keys())
-        c = CurrencyCodes()
-        currency_names = [c.get_currency_name(code) for code in currency_codes]
-
-        # Prepare the data for writing to CSV
-        csv_data = [["code", "name", "current_price", "last_updated"]]
-
-        for code, name in zip(currency_codes, currency_names):
-            current_price = rates[code]
-            # change timestamp to utc datetime object
-            last_updated = datetime.utcfromtimestamp(timestamp).replace(microsecond=0)
-            # change timestamp to isoformat
-            last_updated = last_updated.isoformat()
-            csv_row = [code, name, current_price, last_updated]
-            csv_data.append(csv_row)
-
-        # Write data to CSV file
-        with open(file_path, "w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerows(csv_data)
-
-        print(f"Currency prices, names, and timestamps saved to {filename}.")
+    print(f"Currency prices, names, and timestamps saved to {filename}.")
 
 
 def check_for_csv(current_time, prices_folder_path):

@@ -15,7 +15,7 @@ def start_crypto_thread():
         while True:
             try:
                 last_updated = check_latest_update(asset)
-                print(f"Last updated time for cryptotable: {last_updated}")
+                print(f"Last updated time for Cryptocurrency: {last_updated}")
             except Exception as e:
                 print(f"Error checking last updated time: {e}")
 
@@ -41,8 +41,18 @@ def start_currency_thread():
     def generate_currency_data():
         asset = "currency"
         while True:
-            check_latest_update(asset)
-            currency_import()
+            try:
+                last_updated = check_latest_update(asset)
+                print(f"Last updated time for Currency: {last_updated}")
+            except Exception as e:
+                print(f"Error checking last updated time: {e}")
+
+            if determine_validity(asset, last_updated) == True:
+                print("###### CURRENCY DATA IS UP TO DATE ######")
+            elif determine_validity(asset, last_updated) == False:
+                print("###### CURRENCY DATA IS OUT OF DATE, ACQUIRING NEW DATA ######")
+                currency_import()
+            # Should Wait 15 minutes before checking again (900)
             time.sleep(60)
 
     # Start the currency generation loop on a 2nd thread
@@ -86,7 +96,7 @@ def check_latest_update(asset):
 
 
 def determine_validity(asset, last_updated):
-    # Set validity period based on asset type
+    # Set validity period based on asset type in minutes
     if asset == "cryptocurrency":
         # 7 minutes for Crypto data updates
         validity_period = 7
