@@ -1,21 +1,33 @@
+from datetime import datetime, timedelta, timezone
+from sqlite3 import OperationalError
 import threading
 import time
+from flask import current_app
+from sqlalchemy import create_engine
 from website.cryptocurrency_import import crypto_import
 from website.currency_import import initial_currency_import, currency_import
+from sqlalchemy.orm import sessionmaker
 
 
 def start_crypto_thread():
-    def generate_crypto_csv():
+    def generate_crypto_data():
+        asset = "cryptocurrency"
         while True:
-            crypto_import()
+            try:
+                last_updated = check_latest_update(asset)
+                print(f"Last updated time for cryptotable: {last_updated}")
+            except Exception as e:
+                print(f"Error checking last updated time: {e}")
+
+            if determine_validity(asset, last_updated) == True:
+                print("###### CRYPTO DATA IS UP TO DATE ######")
+            elif determine_validity(asset, last_updated) == False:
+                print("###### CRYPTO DATA IS OUT OF DATE, ACQUIRING NEW DATA ######")
+                crypto_import()
             time.sleep(60)
 
-    # crypto_import()
-    # # Schedule the function to run every 1 minutes
-    # threading.Timer(15.0, generate_csv_loop).start()
-
     # Start the crypto generation loop on a 1st thread
-    crypto_csv_thread = threading.Thread(target=generate_crypto_csv)
+    crypto_csv_thread = threading.Thread(target=generate_crypto_data)
     # Making daemon to allow crtl + c stop to app
     crypto_csv_thread.daemon = True
     crypto_csv_thread.start()
@@ -26,12 +38,118 @@ def start_currency_thread():
     initial_currency_import()
 
     # Schedule the currency check to run every 1 minute
-    def generate_currency_csv():
+    def generate_currency_data():
+        asset = "currency"
         while True:
+            check_latest_update(asset)
             currency_import()
             time.sleep(60)
 
     # Start the currency generation loop on a 2nd thread
-    currency_csv_thread = threading.Thread(target=generate_currency_csv)
+    currency_csv_thread = threading.Thread(target=generate_currency_data)
     currency_csv_thread.daemon = True
     currency_csv_thread.start()
+
+
+def start_stock_thread():
+    pass
+
+
+def check_latest_update(asset):
+    from website.models import AssetLastUpdated
+
+    try:
+        engine = create_engine("sqlite:///./instance/database.db")
+        # Session = sessionmaker(bind=engine)
+        # session = Session()
+    except OperationalError as e:
+        print(f"Error connecting to the database: {e}")
+
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    with Session() as session:
+        result = (
+            session.query(AssetLastUpdated.last_updated)
+            .filter(AssetLastUpdated.asset == asset)
+            .first()
+        )
+
+        print("######   result  ######", result)
+
+        if result:
+            last_updated = result.last_updated
+            session.commit()
+        else:
+            last_updated = None
+
+        return last_updated
+
+
+def determine_validity(asset, last_updated):
+    # Set validity period based on asset type
+    if asset == "cryptocurrency":
+        # 7 minutes for Crypto data updates
+        validity_period = 7
+    elif asset == "currency":
+        # 1 hour for Currency data updates
+        validity_period = 60
+    elif asset == "stock":
+        # 1 hour for Stock data updates
+        validity_period = 60
+
+    if last_updated:
+        expiry_time = last_updated + timedelta(minutes=validity_period)
+    else:
+        print("###### NO LAST UPDATED TIME FOUND ######")
+        return False
+
+    # times in UTC
+    current_time = datetime.now(timezone.utc)
+    expiry_time = expiry_time.replace(tzinfo=timezone.utc)
+
+    # returns True if the data is still valid, False if it is not
+    if expiry_time:
+        print("###### EXPIRY TIME ######", expiry_time)
+        print("###### CURRENT TIME ######", current_time)
+        if current_time > expiry_time:
+            return False
+        else:
+            return True
+    else:
+        return False
+
+
+def update_last_updated(asset):
+    from website.models import AssetLastUpdated
+
+    try:
+        engine = create_engine("sqlite:///./instance/database.db")
+        # Session = sessionmaker(bind=engine)
+        # session = Session()
+    except OperationalError as e:
+        print(f"Error connecting to the database: {e}")
+    # Checking if last updated time exists
+    Session = sessionmaker(bind=engine)
+    print("asset", asset)
+    with Session() as session:
+        record_exists = session.query(AssetLastUpdated).filter_by(asset=asset).first()
+        try:
+            # update the AssetLastUpdated table
+            last_updated = datetime.now(timezone.utc)
+
+            # write to database
+            if record_exists:
+                # update the last_updated time
+                record_exists.last_updated = last_updated
+                session.commit()
+            else:
+                new_query = AssetLastUpdated(
+                    asset=asset,
+                    last_updated=last_updated,
+                )
+                session.add(new_query)
+                session.commit()
+            print("###### Updated AssetLastUpdated table successfully ######")
+
+        except Exception as e:
+            print(f"Error inserting data into AssetLastUpdated table: {e}")

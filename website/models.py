@@ -262,6 +262,12 @@ class Stock(db.Model):
     )
 
 
+class AssetLastUpdated(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asset = db.Column(db.String(64), nullable=False, unique=True)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class CryptocurrencyAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cryptocurrency_code = db.Column(

@@ -5,12 +5,13 @@ import os
 from sqlite3 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from website.models import Currency
 import requests
 from forex_python.converter import CurrencyCodes
 
 
 def initial_currency_import():
+    from website.models import Currency
+
     # Acessing currency file and csv
     currency_file = "currency_data"
     currency_data = "currencies.csv"

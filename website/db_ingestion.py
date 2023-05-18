@@ -14,7 +14,7 @@ def convert_time(last_updated):
     return last_updated
 
 
-def data_insert(latest_cryptocurrency_file):
+def crypto_data_insert(latest_cryptocurrency_file):
     # Creating an engine and session
     try:
         engine = create_engine("sqlite:///./instance/database.db")

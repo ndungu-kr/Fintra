@@ -1,7 +1,10 @@
+from sqlite3 import OperationalError
 import requests
-from os import path, listdir, getcwd
+from os import path, getcwd
 from datetime import datetime, timezone, timedelta
-from . import generate_file
+import csv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 def crypto_import():
@@ -13,66 +16,6 @@ def crypto_import():
     # Setting header with API key
     headers = {"Accepts": "application/json", "X-CMC_PRO_API_KEY": api_key}
 
-    # Acessing crypto file
-    crypto_folder = "crypto_data"
-    cwd = path.abspath(getcwd())
-    crypto_folder_path = path.join(cwd, "website", crypto_folder)
-
-    # getting a list of crypto csvs
-    crypto_file_list = listdir(crypto_folder_path)
-
-    # removing string from file names to make datetime objs, MAKE SURE ONLY CSV IN CRYPTO CSV FILE
-    crypto_file_times_unedited = [
-        s.strip("top_cryptocurrencies ") for s in crypto_file_list
-    ]
-    crypto_file_times_in_string = [s.strip(".csv") for s in crypto_file_times_unedited]
-    crypto_file_times = [
-        datetime.strptime(d, "%Y-%m-%d %H%M%S") for d in crypto_file_times_in_string
-    ]
-
-    # finding the latest file in the folder
-    if crypto_file_times:
-        latest_file_timestamp = max(crypto_file_times)
-        latest_cryptocurrency_file = path.join(
-            crypto_folder_path,
-            (
-                "top_cryptocurrencies "
-                + latest_file_timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                + ".csv"
-            ),
-        )
-    else:
-        latest_file_timestamp = None
-    print("###### LATEST CRYPTO FOLDER TIME ######", latest_file_timestamp)
-
-    current_time = datetime.now(timezone.utc)
-    print("##### CURRENT TIME #####", current_time)
-
-    # Removing milliseconds from time for naming csv
-    formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
-    filename = f"top_cryptocurrencies {formatted_time}.csv"
-
-    # setting csv save location
-    file_path = path.join(crypto_folder_path, filename)
-
-    # Checking time at the refresh/cutoff time - 7 mins
-    current_refresh_time = current_time - timedelta(minutes=7)
-    current_refresh_time = current_refresh_time.replace(microsecond=0, tzinfo=None)
-
-    # Checking if latest CSV file is older than refresh refresh time
-    if latest_file_timestamp is None:
-        print("CSV file does not exist. Calling API to create new CSV file...")
-        latest_cryptocurrency_file = path.join(crypto_folder_path, filename)
-        crypto_data_to_csv(url, headers, file_path, latest_cryptocurrency_file)
-    elif latest_file_timestamp < current_refresh_time:
-        print("CSV file is older than 7 minutes. Calling API to create new CSV file...")
-        latest_cryptocurrency_file = path.join(crypto_folder_path, filename)
-        crypto_data_to_csv(url, headers, file_path, latest_cryptocurrency_file)
-    else:
-        print("CSV file is up-to-date. Exiting script...")
-
-
-def crypto_data_to_csv(url, headers, file_path, latest_cryptocurrency_file):
     # Retreiving data from API using a GET request
     response = requests.get(url, headers=headers)
     data = response.json()
@@ -93,13 +36,94 @@ def crypto_data_to_csv(url, headers, file_path, latest_cryptocurrency_file):
             }
         )
 
-    # Do something else with cryptos
-    # Write it in db
-
-    print(
-        "########## Crypto file created at #############",
-        latest_cryptocurrency_file,
-    )
+    # Writing the cryptocurrency data to the database
+    crypto_data_to_db(cryptos)
 
     # Writing the cryptocurrency data onto a CSV file
-    generate_file.create_crypto_csv(cryptos, file_path, latest_cryptocurrency_file)
+    create_crypto_csv(cryptos)
+
+
+def crypto_data_to_db(cryptos):
+    from website.models import Cryptocurrency
+
+    try:
+        engine = create_engine("sqlite:///./instance/database.db")
+        Session = sessionmaker(bind=engine)
+        # session = Session()
+    except OperationalError as e:
+        print(f"Error connecting to the database: {e}")
+
+    try:
+        added_counter = 0
+        updated_counter = 0
+        for crypto in cryptos:
+            code = crypto["code"]
+            name = crypto["name"]
+            current_price = crypto["current_price"]
+            last_updated = crypto["last_updated"]
+
+            # converting current_price and last_updated to correct format
+            current_price = float(current_price.strip("$"))
+            last_updated = datetime.strptime(last_updated, "%Y-%m-%dT%H:%M:%S")
+
+            Session = sessionmaker(bind=engine)
+            with Session() as session:
+                crypto_code_exists = (
+                    session.query(Cryptocurrency).filter_by(code=code).first()
+                )
+                crypto_name_exists = (
+                    session.query(Cryptocurrency).filter_by(name=name).first()
+                )
+                if crypto_code_exists and crypto_name_exists:
+                    crypto_code_exists.price = current_price
+                    crypto_code_exists.last_updated = last_updated
+                    updated_counter = updated_counter + 1
+                    session.commit()
+                else:
+                    new_query = Cryptocurrency(
+                        code=code,
+                        name=name,
+                        current_price=current_price,
+                        last_updated=last_updated,
+                    )
+                    session.add(new_query)
+                    session.commit()
+                    added_counter = added_counter + 1
+
+        print(added_counter, " New Cryptocurrencies added")
+        print(updated_counter, " Cryptocurrencies updated")
+
+    except Exception as e:
+        print(f"Error inserting data into cryptocurrency table: {e}")
+
+    # Update AssetLastUpdated table
+    from website.loops import update_last_updated
+
+    asset = "cryptocurrency"
+    update_last_updated(asset)
+
+
+def create_crypto_csv(cryptos):
+    # Acessing crypto file
+    crypto_folder = "crypto_data"
+    cwd = path.abspath(getcwd())
+    crypto_folder_path = path.join(cwd, "website", crypto_folder)
+
+    current_time = datetime.now(timezone.utc)
+
+    # Removing milliseconds from time for naming csv
+    formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
+    filename = f"top_cryptocurrencies {formatted_time}.csv"
+
+    # setting csv save location
+    file_path = path.join(crypto_folder_path, filename)
+
+    with open(file_path, "w", newline="") as csvfile:
+        fieldnames = ["code", "name", "current_price", "last_updated"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for crypto in cryptos:
+            writer.writerow(crypto)
+
+        print("###### Cryptocurrency CSV created successfully ######")
