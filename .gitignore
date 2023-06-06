@@ -1,2 +1,6 @@
 *.pyc
 .env
+crypto_data
+currency_data
+stock_data
+```      

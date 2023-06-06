@@ -219,7 +219,8 @@ class StockSell(db.Model):
 
 
 class Cryptocurrency(db.Model):
-    code = db.Column(db.String(5), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(5), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -235,10 +236,11 @@ class Cryptocurrency(db.Model):
 
 
 class Currency(db.Model):
-    code = db.Column(db.String(3), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     symbol = db.Column(db.String(5))
-    current_price = db.Column(db.DECIMAL, nullable=False, default=0)
+    current_price = db.Column(db.DECIMAL, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     forex_purchased = db.relationship("ForexBuy", backref="forex_purchased", lazy=True)
     forex_sold = db.relationship("ForexSell", backref="forex_sold", lazy=True)
@@ -248,7 +250,8 @@ class Currency(db.Model):
 
 
 class Stock(db.Model):
-    code = db.Column(db.String(5), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(5))
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -257,6 +260,12 @@ class Stock(db.Model):
     stock_asstet_amounts = db.relationship(
         "StockAmount", backref="stock_asset_amounts", lazy=True
     )
+
+
+class AssetLastUpdated(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asset = db.Column(db.String(64), nullable=False, unique=True)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
 class CryptocurrencyAmount(db.Model):
