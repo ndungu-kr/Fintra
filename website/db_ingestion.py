@@ -7,6 +7,9 @@ from decimal import Decimal
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
+# Functions not in use:
+# this function is not in use, but can be used to create a csv file of the latest cryptocurrency data
+
 
 def convert_time(last_updated):
     date_format = "%Y-%m-%dT%H:%M:%S"
