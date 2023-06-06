@@ -101,21 +101,3 @@ def buy_stock():
 @login_required
 def sell_stock():
     return render_template("sell_stock.html", user=current_user)
-
-
-@views.route("/cryptocurrency-tracker", methods=["GET", "POST"])
-@login_required
-def cryptocurrency_tracker():
-    return render_template("cryptocurrency_tracker.html", user=current_user)
-
-
-@views.route("/forex-tracker", methods=["GET", "POST"])
-@login_required
-def forex_tracker():
-    return render_template("forex_tracker.html", user=current_user)
-
-
-@views.route("/stock-tracker", methods=["GET", "POST"])
-@login_required
-def stock_tracker():
-    return render_template("stock_tracker.html", user=current_user)
