@@ -35,6 +35,11 @@
                 <div class="d-flex ms-auto">
                     <ul class="navbar-nav mb-2 mb-lg-0 ">
                         {% if user.is_authenticated %}
+                        <span class="navbar-text">
+                            $0.00
+                        </span>
+                        <button type="button" class="btn btn-primary btn-sm m-1 w-100">Deposit</button>
+                        <button type="button" class="btn btn-secondary btn-sm m-1 w-100">Withdraw</button>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">

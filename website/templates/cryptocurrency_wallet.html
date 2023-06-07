@@ -35,6 +35,58 @@
     </div>
 </div>
 
+<!-- Monthly Breakdown -->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">$0.00</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Profit/Loss this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">$0.00</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graph -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-header">Cryptocurrency Performance Graph</div>
+            <div class="card-body">
+                <canvas id="cryptocurrencyPerformanceGraph"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">Cryptocurrency Distribution Pie Chart</div>
+            <div class="card-body">
+                <canvas id="cryptocurrencyDistribution" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">Largest Positions by Market Value</div>
+            <div class="card-body">
+                <canvas id="cryptoPositionsByMarketValue" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!--Buy/Sell cryptocurrency-->
 <div class="row">
     <div class="col-md-12 mb-3">
@@ -48,20 +100,6 @@
                         <a class="btn btn-success m-1 w-100" href="/cryptocurrency-wallet/sell-cryptocurrency"
                             role="button">Sell</a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Graph -->
-<div class="row">
-    <div class="col-md-12 mb-3">
-        <div class="card">
-            <div class="card-header">Data Graph</div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <!-- Go to chart.js for this -->
                 </div>
             </div>
         </div>
@@ -111,5 +149,63 @@
         </tr>
     </tbody>
 </table>
+
+<script>
+    // Cryptocurrency Performance Chart
+    const cty = document.getElementById('cryptocurrencyPerformanceGraph');
+    new Chart(cty, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Cryptocurrency Value',
+                data: [12, 19, -3, 5, 2, 3],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+    });
+
+    // Cryptocurrency Distribution Chart
+    const ctz = document.getElementById('cryptocurrencyDistribution');
+    new Chart(ctz, {
+        type: 'doughnut',
+        data: {
+            labels: ['Bitcoin', 'Ethereum', 'Cardano'],
+            datasets: [{
+                label: 'My First Dataset',
+                data: [300, 50, 100],
+                backgroundColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)'
+                ],
+                hoverOffset: 4
+            }]
+        },
+    });
+
+    // Positions by Market Value Chart
+    const ctx = document.getElementById('cryptoPositionsByMarketValue');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Bitcoin', 'Ethereum', 'Cardano'],
+            datasets: [{
+                label: 'Value in USD',
+                data: [12000, 1900, 3000],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
 {% endblock %}
