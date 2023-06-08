@@ -64,7 +64,9 @@ def initial_currency_import():
             session.commit()
             session.close()
 
-            print(added_counter, " New Currencies added")
+            print(
+                "##### Database Update: ", added_counter, " New Currencies added #####"
+            )
 
     except Exception as e:
         print(f"Error inserting data into currency table: {e}")
