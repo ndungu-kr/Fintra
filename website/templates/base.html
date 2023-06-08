@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>{% block title %}{% endblock %}</title>
 </head>
 
@@ -34,6 +35,11 @@
                 <div class="d-flex ms-auto">
                     <ul class="navbar-nav mb-2 mb-lg-0 ">
                         {% if user.is_authenticated %}
+                        <span class="navbar-text">
+                            $0.00
+                        </span>
+                        <button type="button" class="btn btn-primary btn-sm m-1 w-100">Deposit</button>
+                        <button type="button" class="btn btn-secondary btn-sm m-1 w-100">Withdraw</button>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -83,38 +89,6 @@
                                 Dashboard
                             </span>
                         </a>
-                    </li>
-                    <li>
-                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse" href="#trackerCollapse"
-                            role="button" aria-expanded="false" aria-controls="trackerCollapse">
-                            <span class="me-2"><i class="bi bi-activity"></i></span>
-                            <span>Trackers</span>
-                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
-                        </a>
-                        <div class="collapse" id="trackerCollapse">
-                            <div>
-                                <ul class="navbar-nav ps-3">
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/cryptocurrency-tracker">
-                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
-                                            <span>Cryptocurrency</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/forex-tracker">
-                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
-                                            <span>Forex</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/stock-tracker">
-                                            <span class="me-2"><i class="bi bi-clipboard-data-fill"></i></span>
-                                            <span>Stocks</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
                     </li>
                     <li>
                         <div class="text-muted small fw-bold text-uppercase px-3">Wallets</div>
