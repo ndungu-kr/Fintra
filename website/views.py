@@ -2,7 +2,12 @@ from unicodedata import category
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 
-from website.models import Cryptocurrency, CryptocurrencyAmount, CryptocurrencyBuy
+from website.models import (
+    Cryptocurrency,
+    CryptocurrencyAmount,
+    CryptocurrencyBuy,
+    CryptocurrencySell,
+)
 
 # from .models import Transaction
 from . import db
@@ -38,19 +43,6 @@ def dashboard():
     return render_template("dashboard.html", user=current_user)
 
 
-@views.route("/delete-transaction", methods=["POST"])
-def delete_transaction():
-    # transaction = json.loads(request.data)
-    # transactionId = transaction["transactionId"]
-    # transaction = Transaction.query.get(transactionId)
-    # if transaction:
-    #     if transaction.user_id == current_user.id:
-    #         db.session.delete(transaction)
-    #         db.session.commit()
-
-    return jsonify({})
-
-
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
@@ -59,6 +51,60 @@ def cryptocurrency_wallet():
     total_invested = None
     total_invested_this_month = None
     profit_this_month = None
+
+    # getting the total amount of cryptocurrency owned by the user
+    user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
+    if user_cryptos is not None:
+        for crypto in user_cryptos:
+            # add cryptocurrency price and name to the crypto object
+            cryptocurrency_data = Cryptocurrency.query.filter_by(
+                code=crypto.cryptocurrency_code
+            ).first()
+            crypto.price = cryptocurrency_data.current_price
+            crypto.name = cryptocurrency_data.name
+            crypto.quantity = round(crypto.quantity, 6)
+            crypto.full_value = crypto.quantity * crypto.price
+            # formatting the value to 2 decimal places and adding commas to thousands
+            crypto.value = f"{crypto.full_value:,.2f}"
+            # getting all the buy and sell instances for the cryptocurrency
+            crypto.buy_instances = CryptocurrencyBuy.query.filter_by(
+                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+            ).all()
+            crypto.sell_instances = CryptocurrencySell.query.filter_by(
+                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+            ).all()
+            # calculating the total amount spent on the cryptocurrency
+            total_spent_on_crypto = 0
+            for buy_instance in crypto.buy_instances:
+                total_spent_on_crypto += buy_instance.monetary_amount
+            for sell_instance in crypto.sell_instances:
+                total_spent_on_crypto -= sell_instance.monetary_amount
+            crypto.total_spent = total_spent_on_crypto
+            # calculating the profit/loss on the cryptocurrency
+            crypto.profit = crypto.full_value - crypto.total_spent
+            crypto.profit_percentage = (crypto.profit / crypto.total_spent) * 100
+            crypto.profit = f"{crypto.profit:,.2f}"
+            # adding "$" to the profit value
+            if crypto.profit[0] != "-":
+                crypto.profit = f"${crypto.profit}"
+            else:
+                crypto.profit = f"-${crypto.profit[1:]}"
+            crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}"
+
+    # getting the users cryptocurrency transactions
+    # user_buy_transactions = CryptocurrencyBuy.query.filter_by(
+    #     user_id=current_user.id
+    # ).all()
+    # user_sell_transactions = CryptocurrencySell.query.filter_by(
+    #     user_id=current_user.id
+    # ).all()
+    # merging the buy and sell transactions into one list in decending order of date
+    # user_transactions = user_buy_transactions + user_sell_transactions
+    # user_transactions.sort(key=lambda x: x.date, reverse=True)
+    # if user_transactions is not None:
+    #     for transaction in user_transactions:
+    #         transaction.
+
     return render_template(
         "cryptocurrency_wallet.html",
         user=current_user,
@@ -67,6 +113,7 @@ def cryptocurrency_wallet():
         total_invested=total_invested,
         total_invested_this_month=total_invested_this_month,
         profit_this_month=profit_this_month,
+        user_cryptos=user_cryptos,
     )
 
 
