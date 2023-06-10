@@ -57,6 +57,13 @@ def dashboard():
 #     return jsonify({})
 
 
+def get_cryptocurrency_data(cryptocurrency_code):
+    cryptocurrency_data = Cryptocurrency.query.filter_by(
+        code=cryptocurrency_code
+    ).first()
+    return cryptocurrency_data
+
+
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
@@ -70,12 +77,11 @@ def cryptocurrency_wallet():
     user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
     if user_cryptos is not None:
         for crypto in user_cryptos:
+            cryptocurrency_data = get_cryptocurrency_data(crypto.cryptocurrency_code)
             # add cryptocurrency price and name to the crypto object
-            cryptocurrency_data = Cryptocurrency.query.filter_by(
-                code=crypto.cryptocurrency_code
-            ).first()
             crypto.price = cryptocurrency_data.current_price
             crypto.name = cryptocurrency_data.name
+
             crypto.quantity = round(crypto.quantity, 6)
             crypto.full_value = crypto.quantity * crypto.price
             # formatting the value to 2 decimal places and adding commas to thousands
@@ -106,18 +112,34 @@ def cryptocurrency_wallet():
             crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}"
 
     # getting the users cryptocurrency transactions
-    # user_buy_transactions = CryptocurrencyBuy.query.filter_by(
-    #     user_id=current_user.id
-    # ).all()
-    # user_sell_transactions = CryptocurrencySell.query.filter_by(
-    #     user_id=current_user.id
-    # ).all()
+    user_buy_transactions = CryptocurrencyBuy.query.filter_by(
+        user_id=current_user.id
+    ).all()
+    for buy_transaction in user_buy_transactions:
+        buy_transaction.type = "Buy"
+
+    user_sell_transactions = CryptocurrencySell.query.filter_by(
+        user_id=current_user.id
+    ).all()
+    for sell_transaction in user_sell_transactions:
+        sell_transaction.type = "Sell"
+
     # merging the buy and sell transactions into one list in decending order of date
-    # user_transactions = user_buy_transactions + user_sell_transactions
-    # user_transactions.sort(key=lambda x: x.date, reverse=True)
-    # if user_transactions is not None:
-    #     for transaction in user_transactions:
-    #         transaction.
+    user_transactions = user_buy_transactions + user_sell_transactions
+    user_transactions.sort(key=lambda x: x.date, reverse=True)
+    if user_transactions is not None:
+        for transaction in user_transactions:
+            cryptocurrency_data = get_cryptocurrency_data(
+                transaction.cryptocurrency_code
+            )
+            transaction.name = cryptocurrency_data.name
+            transaction.crypto_amount = round(transaction.crypto_amount, 6)
+            # formatting the value to 2 decimal places and adding commas to thousands
+            # transaction.monetary amount is a string but i need to change it to a float to format it
+            transaction.value = float(transaction.monetary_amount)
+            transaction.value = f"${transaction.value:,.2f}"
+            # changing the date to a string in the format "Day/Month/Year"
+            transaction.short_date = transaction.date.strftime("%d/%m/%Y")
 
     return render_template(
         "cryptocurrency_wallet.html",
@@ -128,6 +150,7 @@ def cryptocurrency_wallet():
         total_invested_this_month=total_invested_this_month,
         profit_this_month=profit_this_month,
         user_cryptos=user_cryptos,
+        user_transactions=user_transactions,
     )
 
 

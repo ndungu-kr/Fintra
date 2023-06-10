@@ -146,12 +146,20 @@
         </tr>
     </thead>
     <tbody>
+        {% if user_transactions != None %}
+        {% for transaction in user_transactions %}
         <tr>
-            <th scope="row">Bitcoin</th>
-            <td>100</td>
-            <td>1000000</td>
-            <td>10/11/2022</td>
+            <td>{{ transaction.name }}</td>
+            {% if transaction.type == "Buy" %}
+            <td>{{ transaction.crypto_amount }} (Buy)</td>
+            {% else %}
+            <td>{{ transaction.crypto_amount }} (Sell)</td>
+            {% endif %}
+            <td>{{ transaction.value }}</td>
+            <td>{{ transaction.short_date }}</td>
         </tr>
+        {% endfor %}
+        {% endif %}
     </tbody>
 </table>
 
