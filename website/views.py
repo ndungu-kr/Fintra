@@ -1,6 +1,7 @@
 from unicodedata import category
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, redirect, render_template, request, flash, jsonify, url_for
 from flask_login import login_required, current_user
+import decimal
 
 from website.models import (
     Cryptocurrency,
@@ -41,6 +42,19 @@ def dashboard():
     else:
         pass
     return render_template("dashboard.html", user=current_user)
+
+
+# @views.route("/delete-transaction", methods=["POST"])
+# def delete_transaction():
+#     # transaction = json.loads(request.data)
+#     # transactionId = transaction["transactionId"]
+#     # transaction = Transaction.query.get(transactionId)
+#     # if transaction:
+#     #     if transaction.user_id == current_user.id:
+#     #         db.session.delete(transaction)
+#     #         db.session.commit()
+
+#     return jsonify({})
 
 
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
@@ -126,7 +140,7 @@ def buy_cryptocurrency():
 @views.route("/submit-crypto-buy", methods=["POST"])
 def submit_crypto_buy():
     cryptocurrency_code = request.form.get("cryptocurrency")
-    cryptocurrency_amount = int(request.form.get("cryptocurrencyAmount"))
+    cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
     monetary_amount = float(request.form.get("monetaryAmount"))
     description = request.form.get("description")
 
@@ -176,13 +190,55 @@ def submit_crypto_buy():
             user_owns_asset.quantity += cryptocurrency_amount
 
         db.session.commit()
-        flash("Transaction successfully added.", category="success")
-        return render_template("cryptocurrency_wallet.html", user=current_user)
+        flash("Cryptocurrency successfully purchased.", category="success")
+        return redirect(url_for("views.cryptocurrency_wallet"))
 
 
 @views.route("/submit-crypto-sell", methods=["POST"])
 def submit_crypto_sell():
-    pass
+    cryptocurrency_code = request.form.get("cryptocurrency")
+    cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
+    monetary_amount = float(request.form.get("monetaryAmount"))
+    description = request.form.get("description")
+
+    errors = []
+    if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
+        errors.append("Please enter a valid cryptocurrency amount.")
+
+    if monetary_amount == 0 or monetary_amount < 0:
+        errors.append("Please enter a valid monetary value.")
+
+    user_owns_crypto = CryptocurrencyAmount.query.filter_by(
+        cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+    ).first()
+    if user_owns_crypto is None:
+        errors.append("You do not own this cryptocurrency.")
+
+    if len(errors) > 0:
+        for error in errors:
+            flash(error, category="error")
+        return render_template("sell_cryptocurrency.html", user=current_user)
+    else:
+        # adding transaction to sell cryptocurrency
+        add_to_crypto_sell = CryptocurrencySell(
+            cryptocurrency_code=cryptocurrency_code,
+            user_id=current_user.id,
+            crypto_amount=cryptocurrency_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=None,
+        )
+        db.session.add(add_to_crypto_sell)
+
+        # updating the cryptocurrency amounts table
+        user_crypto_amount = CryptocurrencyAmount.query.filter_by(
+            cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+        ).first()
+        user_crypto_amount.quantity -= cryptocurrency_amount
+
+        db.session.commit()
+        flash("Cryptocurrency successfully sold.", category="success")
+        return redirect(url_for("views.cryptocurrency_wallet"))
 
 
 @views.route("/cryptocurrency-wallet/sell-cryptocurrency", methods=["GET", "POST"])
