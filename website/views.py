@@ -2,6 +2,8 @@ from unicodedata import category
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 
+from website.models import Cryptocurrency, CryptocurrencyAmount, CryptocurrencyBuy
+
 # from .models import Transaction
 from . import db
 import json
@@ -52,13 +54,88 @@ def delete_transaction():
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
-    return render_template("cryptocurrency_wallet.html", user=current_user)
+    crypto_balance = None
+    profit = None
+    total_invested = None
+    total_invested_this_month = None
+    profit_this_month = None
+    return render_template(
+        "cryptocurrency_wallet.html",
+        user=current_user,
+        crypto_balance=crypto_balance,
+        profit=profit,
+        total_invested=total_invested,
+        total_invested_this_month=total_invested_this_month,
+        profit_this_month=profit_this_month,
+    )
 
 
 @views.route("/cryptocurrency-wallet/buy-cryptocurrency", methods=["GET", "POST"])
 @login_required
 def buy_cryptocurrency():
     return render_template("buy_cryptocurrency.html", user=current_user)
+
+
+@views.route("/submit-crypto-buy", methods=["POST"])
+def submit_crypto_buy():
+    cryptocurrency_code = request.form.get("cryptocurrency")
+    cryptocurrency_amount = int(request.form.get("cryptocurrencyAmount"))
+    monetary_amount = float(request.form.get("monetaryAmount"))
+    description = request.form.get("description")
+
+    errors = []
+    if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
+        errors.append("Please enter a valid cryptocurrency amount.")
+
+    if monetary_amount == 0 or monetary_amount < 0:
+        errors.append("Please enter a valid monetary value.")
+
+    cryptocurrency_code_exists = Cryptocurrency.query.filter_by(
+        code=cryptocurrency_code
+    ).first()
+    if cryptocurrency_code_exists is None:
+        errors.append(
+            "Cryptocurrency does not exist. Please select one from our selection."
+        )
+
+    if len(errors) > 0:
+        for error in errors:
+            flash(error, category="error")
+        return render_template("buy_cryptocurrency.html", user=current_user)
+    else:
+        # adding transaction to buy cryptocurrency
+        add_to_crypto_buy = CryptocurrencyBuy(
+            cryptocurrency_code=cryptocurrency_code,
+            user_id=current_user.id,
+            crypto_amount=cryptocurrency_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=None,
+        )
+        db.session.add(add_to_crypto_buy)
+
+        # updating the cryptocurrency amounts table if the user already owns the cryptocurrency
+        user_owns_asset = CryptocurrencyAmount.query.filter_by(
+            cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+        ).first()
+        if user_owns_asset is None:
+            add_to_crypto_amounts = CryptocurrencyAmount(
+                cryptocurrency_code=cryptocurrency_code,
+                quantity=cryptocurrency_amount,
+                user_id=current_user.id,
+            )
+            db.session.add(add_to_crypto_amounts)
+        else:
+            user_owns_asset.quantity += cryptocurrency_amount
+
+        db.session.commit()
+        flash("Transaction successfully added.", category="success")
+        return render_template("cryptocurrency_wallet.html", user=current_user)
+
+
+@views.route("/submit-crypto-sell", methods=["POST"])
+def submit_crypto_sell():
+    pass
 
 
 @views.route("/cryptocurrency-wallet/sell-cryptocurrency", methods=["GET", "POST"])
