@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User, Wallet
+from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -65,20 +65,9 @@ def sign_up():
             )
             db.session.add(new_user)
             db.session.commit()
-            new_user_id = new_user.id
-
-            # creating all wallets for a new user
-            create_wallet(new_user_id)
 
             login_user(new_user, remember=True)
             flash("Account created.", category="success")
             return redirect(url_for("views.dashboard"))
 
     return render_template("sign_up.html", user=current_user)
-
-
-def create_wallet(new_user_id):
-    # creating main wallet
-    new_wallet = Wallet(user_id=new_user_id)
-    db.session.add(new_wallet)
-    db.session.commit()

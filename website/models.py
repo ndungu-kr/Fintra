@@ -12,15 +12,9 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
-    wallet = db.relationship("Wallet", backref="user", uselist=False)
 
     def __repr__(self):
         return f"User('{self.first_name}', '{self.email}')"
-
-
-class Wallet(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
 
 
 class CryptocurrencyBuy(db.Model):
@@ -28,7 +22,7 @@ class CryptocurrencyBuy(db.Model):
     cryptocurrency_code = db.Column(
         db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
     )
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     crypto_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -43,7 +37,7 @@ class CryptocurrencySell(db.Model):
     cryptocurrency_code = db.Column(
         db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
     )
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     crypto_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -56,7 +50,7 @@ class CryptocurrencySell(db.Model):
 class ForexBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     currency_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -69,7 +63,7 @@ class ForexBuy(db.Model):
 class ForexSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     currency_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -82,7 +76,7 @@ class ForexSell(db.Model):
 class StockBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     stock_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -95,7 +89,7 @@ class StockBuy(db.Model):
 class StockSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     stock_amount = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -160,7 +154,7 @@ class CryptocurrencyAmount(db.Model):
     cryptocurrency_code = db.Column(
         db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
     )
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -168,7 +162,7 @@ class CryptocurrencyAmount(db.Model):
 class CurrencyAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -176,6 +170,6 @@ class CurrencyAmount(db.Model):
 class StockAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
