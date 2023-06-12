@@ -13,7 +13,7 @@
         <div class="card text-bg-light h-100">
             <div class="card-header">Cryptocurrency Balance</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <h5 class="card-title">{{ total_crypto_balance }}</h5>
             </div>
         </div>
     </div>
@@ -21,7 +21,14 @@
         <div class="card text-bg-light h-100">
             <div class="card-header">Profit/Loss</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">{{ total_asset_profit }}</h5>
+                    </div>
+                    <div class="col-4 text-end">
+                        <p class="card-text">{{ total_asset_profit_percentage }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -29,7 +36,7 @@
         <div class="card text-bg-light h-100">
             <div class="card-header">Total Invested</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <h5 class="card-title">{{ total_invested }}</h5>
             </div>
         </div>
     </div>
@@ -37,19 +44,34 @@
 
 <!-- Monthly Breakdown -->
 <div class="row">
-    <div class="col-md-6 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested this Month</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
         <div class="card text-bg-light h-100">
             <div class="card-header">Profit/Loss this Month</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">{{ profit_this_month }}</h5>
+                    </div>
+                    <div class="col-4 text-end">
+                        <p class="card-text">{{ profit_this_month_percentage }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Sold this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_sold_this_month }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_invested_this_month }}</h5>
             </div>
         </div>
     </div>
@@ -126,8 +148,8 @@
             <td>{{ crypto.name }}</td>
             <td>{{ crypto.quantity }}</td>
             <td>${{ crypto.value }}</td>
-            <td>{{ crypto.profit}}</td>
-            <td>{{ crypto.profit_percentage }}%</td>
+            <td>TBC</td>
+            <td>TBC</td>
         </tr>
         {% endfor %}
         {% endif %}

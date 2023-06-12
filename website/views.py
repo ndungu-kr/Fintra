@@ -1,3 +1,4 @@
+from datetime import datetime
 from unicodedata import category
 from flask import Blueprint, redirect, render_template, request, flash, jsonify, url_for
 from flask_login import login_required, current_user
@@ -67,65 +68,220 @@ def get_cryptocurrency_data(cryptocurrency_code):
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
-    crypto_balance = None
-    profit = None
-    total_invested = None
-    total_invested_this_month = None
-    profit_this_month = None
+    crypto_balance = 0
+    total_invested = 0
 
     # getting the total amount of cryptocurrency owned by the user
     user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
     if user_cryptos is not None:
         for crypto in user_cryptos:
             cryptocurrency_data = get_cryptocurrency_data(crypto.cryptocurrency_code)
+
             # add cryptocurrency price and name to the crypto object
             crypto.price = cryptocurrency_data.current_price
             crypto.name = cryptocurrency_data.name
 
+            # calculating the total value of the cryptocurrency
             crypto.quantity = round(crypto.quantity, 6)
             crypto.full_value = crypto.quantity * crypto.price
+
+            # adding the value of the cryptocurrency to the total crypto balance
+            crypto_balance += crypto.full_value
+
             # formatting the value to 2 decimal places and adding commas to thousands
             crypto.value = f"{crypto.full_value:,.2f}"
-            # getting all the buy and sell instances for the cryptocurrency
+
+            # getting all the buy and sell instances for the specific cryptocurrency
             crypto.buy_instances = CryptocurrencyBuy.query.filter_by(
                 user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
             ).all()
             crypto.sell_instances = CryptocurrencySell.query.filter_by(
                 user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
             ).all()
+
             # calculating the total amount spent on the cryptocurrency
-            total_spent_on_crypto = 0
+            total_spent_on_asset = 0
             for buy_instance in crypto.buy_instances:
-                total_spent_on_crypto += buy_instance.monetary_amount
+                total_spent_on_asset += buy_instance.monetary_amount
             for sell_instance in crypto.sell_instances:
-                total_spent_on_crypto -= sell_instance.monetary_amount
-            crypto.total_spent = total_spent_on_crypto
-            # calculating the profit/loss on the cryptocurrency
-            crypto.profit = crypto.full_value - crypto.total_spent
-            crypto.profit_percentage = (crypto.profit / crypto.total_spent) * 100
-            crypto.profit = f"{crypto.profit:,.2f}"
-            # adding "$" to the profit value
-            if crypto.profit[0] != "-":
-                crypto.profit = f"${crypto.profit}"
+                total_spent_on_asset -= sell_instance.monetary_amount
+            crypto.total_spent = total_spent_on_asset
+
+            total_invested += crypto.total_spent
+
+            # Redo this part
+            # # calculating the profit/loss on the cryptocurrency
+            # crypto.profit = crypto.full_value - crypto.total_spent
+            # if crypto.total_spent == 0:
+            #     crypto.profit_percentage = 0
+            # else:
+            #     crypto.profit_percentage = (crypto.profit / crypto.total_spent) * 100
+            # crypto.profit = f"{crypto.profit:,.2f}"
+
+            # # adding "$" to the profit value
+            # if crypto.profit[0] != "-":
+            #     crypto.profit = f"${crypto.profit}"
+            # else:
+            #     crypto.profit = f"-${crypto.profit[1:]}"
+            # crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
+
+        # calculating total asset profit
+        # getting the users cryptocurrency transactions
+        user_buy_transactions = CryptocurrencyBuy.query.filter_by(
+            user_id=current_user.id
+        ).all()
+        user_sell_transactions = CryptocurrencySell.query.filter_by(
+            user_id=current_user.id
+        ).all()
+        total_monetary_gained = 0
+        total_asset_spend = 0
+        value_of_remaining_assets = 0
+        asset_quantities = {}
+        # calculating the total spent
+        for buy_tranz in user_buy_transactions:
+            total_asset_spend += buy_tranz.monetary_amount
+            # if asset exists in dictionary, add to the quantity
+            if buy_tranz.cryptocurrency_code in asset_quantities:
+                asset_quantities[
+                    buy_tranz.cryptocurrency_code
+                ] += buy_tranz.crypto_amount
             else:
-                crypto.profit = f"-${crypto.profit[1:]}"
-            crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}"
+                asset_quantities[
+                    buy_tranz.cryptocurrency_code
+                ] = buy_tranz.crypto_amount
+
+        # calculating value of asset sold
+        for sell_tranz in user_sell_transactions:
+            total_monetary_gained += sell_tranz.monetary_amount
+            asset_quantities[sell_tranz.cryptocurrency_code] -= sell_tranz.crypto_amount
+        # calculating value of remaining assets
+        for asset in asset_quantities:
+            crypto_data = get_cryptocurrency_data(asset)
+            value_of_remaining_assets += (
+                asset_quantities[asset] * crypto_data.current_price
+            )
+        # calculating total profit
+        total_asset_profit = (
+            total_monetary_gained + value_of_remaining_assets - total_asset_spend
+        )
+        if total_asset_spend != 0:
+            total_asset_profit_percentage = (
+                total_asset_profit / total_asset_spend
+            ) * 100
+            total_asset_profit_percentage = f"{total_asset_profit_percentage:,.2f}%"
+            if total_asset_profit >= 0:
+                total_asset_profit = f"${total_asset_profit:,.2f}"
+            elif total_asset_profit < 0:
+                total_asset_profit = total_asset_profit * -1
+                total_asset_profit = f"-${total_asset_profit:,.2f}"
+        else:
+            total_asset_profit_percentage = "0.00%"
+            total_asset_profit = "$0.00"
+
+        # formatting to 2 decimal places and adding commas to thousands
+        total_crypto_balance = f"${crypto_balance:,.2f}"
+        total_invested = f"${total_invested:,.2f}"
 
     # getting the users cryptocurrency transactions
-    user_buy_transactions = CryptocurrencyBuy.query.filter_by(
+    user_buy_transactions2 = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()
-    for buy_transaction in user_buy_transactions:
+    user_sell_transactions2 = CryptocurrencySell.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    # calculating the total invested and sold this month
+    total_invested_this_month = 0
+    total_sold_this_month = 0
+    monetary_amount_gained_this_month = 0
+    total_spent_on_crypto_this_month = 0
+    value_of_rem_crypto_purchased_this_month = 0
+    remaining_crypto_quantities = {}
+
+    for buy_transaction in user_buy_transactions2:
+        if buy_transaction.date.month == datetime.now().month:
+            total_invested_this_month += buy_transaction.monetary_amount
+    for sell_transaction in user_sell_transactions2:
+        if sell_transaction.date.month == datetime.now().month:
+            total_sold_this_month += sell_transaction.monetary_amount
+
+    # calculating the total spent this month
+    for buy_transaction in user_buy_transactions2:
+        if buy_transaction.date.month == datetime.now().month:
+            total_spent_on_crypto_this_month += buy_transaction.monetary_amount
+            # put crypto code and quantity into dictionary
+            if buy_transaction.cryptocurrency_code in remaining_crypto_quantities:
+                remaining_crypto_quantities[
+                    buy_transaction.cryptocurrency_code
+                ] += buy_transaction.crypto_amount
+            else:
+                remaining_crypto_quantities[
+                    buy_transaction.cryptocurrency_code
+                ] = buy_transaction.crypto_amount
+
+    # calculating the value of the cryptocurrency sold this month
+    for sell_transaction in user_sell_transactions2:
+        if sell_transaction.date.month == datetime.now().month:
+            monetary_amount_gained_this_month += sell_transaction.monetary_amount
+        # subtracting the quantity of the cryptocurrency sold from the dictionary
+        if sell_transaction.cryptocurrency_code in remaining_crypto_quantities:
+            remaining_crypto_quantities[
+                sell_transaction.cryptocurrency_code
+            ] -= sell_transaction.crypto_amount
+        # situation where the user sold asset bought before this month
+        else:
+            remaining_crypto_quantities[
+                sell_transaction.cryptocurrency_code
+            ] = sell_transaction.crypto_amount
+
+    # calculating the value of the remaining cryptocurrency purchased this month
+    for crypto in remaining_crypto_quantities:
+        cryptocurrency_data = get_cryptocurrency_data(crypto)
+        value_of_rem_crypto_purchased_this_month += (
+            remaining_crypto_quantities[crypto] * cryptocurrency_data.current_price
+        )
+
+    print("monetary amount gained this month:", monetary_amount_gained_this_month)
+    print(
+        "value of remaining crypto purchased this month:",
+        value_of_rem_crypto_purchased_this_month,
+    )
+    print("total spent on crypto this month:", total_spent_on_crypto_this_month)
+
+    profit_this_month = (
+        monetary_amount_gained_this_month
+        + value_of_rem_crypto_purchased_this_month
+        - total_spent_on_crypto_this_month
+    )
+
+    if total_spent_on_crypto_this_month != 0:
+        profit_this_month_percentage = (
+            profit_this_month / total_spent_on_crypto_this_month
+        ) * 100
+        profit_this_month = f"${profit_this_month:,.2f}"
+        profit_this_month_percentage = f"{profit_this_month_percentage:,.2f}%"
+    else:
+        profit_this_month = "$0.00"
+        profit_this_month_percentage = "0.00%"
+
+    # formating after as we need to calculate the total invested this month first
+    total_invested_this_month = f"${total_invested_this_month:,.2f}"
+    total_sold_this_month = f"${total_sold_this_month:,.2f}"
+
+    # calculating the profit this month
+    user_buy_transactions3 = CryptocurrencyBuy.query.filter_by(
+        user_id=current_user.id
+    ).all()
+    user_sell_transactions3 = CryptocurrencySell.query.filter_by(
+        user_id=current_user.id
+    ).all()
+    # marking the buy and sell transactions as buy or sell
+    for buy_transaction in user_buy_transactions3:
         buy_transaction.type = "Buy"
-
-    user_sell_transactions = CryptocurrencySell.query.filter_by(
-        user_id=current_user.id
-    ).all()
-    for sell_transaction in user_sell_transactions:
+    for sell_transaction in user_sell_transactions3:
         sell_transaction.type = "Sell"
-
     # merging the buy and sell transactions into one list in decending order of date
-    user_transactions = user_buy_transactions + user_sell_transactions
+    user_transactions = user_buy_transactions3 + user_sell_transactions3
     user_transactions.sort(key=lambda x: x.date, reverse=True)
     if user_transactions is not None:
         for transaction in user_transactions:
@@ -144,13 +300,16 @@ def cryptocurrency_wallet():
     return render_template(
         "cryptocurrency_wallet.html",
         user=current_user,
-        crypto_balance=crypto_balance,
-        profit=profit,
+        total_crypto_balance=total_crypto_balance,
+        total_asset_profit=total_asset_profit,
+        total_asset_profit_percentage=total_asset_profit_percentage,
         total_invested=total_invested,
         total_invested_this_month=total_invested_this_month,
-        profit_this_month=profit_this_month,
+        total_sold_this_month=total_sold_this_month,
         user_cryptos=user_cryptos,
         user_transactions=user_transactions,
+        profit_this_month=profit_this_month,
+        profit_this_month_percentage=profit_this_month_percentage,
     )
 
 
@@ -165,9 +324,16 @@ def submit_crypto_buy():
     cryptocurrency_code = request.form.get("cryptocurrency")
     cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
     monetary_amount = float(request.form.get("monetaryAmount"))
+    date_input = request.form.get("transactionDate")
     description = request.form.get("description")
-
     errors = []
+
+    # date is entered as a string in the format "DD/MM/YYYY" so we need to convert it to a datetime object
+    try:
+        date = datetime.strptime(date_input, "%d/%m/%Y")
+    except ValueError:
+        errors.append("Please enter a valid date.")
+
     if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
         errors.append("Please enter a valid cryptocurrency amount.")
 
@@ -194,7 +360,7 @@ def submit_crypto_buy():
             crypto_amount=cryptocurrency_amount,
             monetary_amount=monetary_amount,
             description=description,
-            date=None,
+            date=date,
         )
         db.session.add(add_to_crypto_buy)
 
@@ -222,9 +388,16 @@ def submit_crypto_sell():
     cryptocurrency_code = request.form.get("cryptocurrency")
     cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
     monetary_amount = float(request.form.get("monetaryAmount"))
+    date_input = request.form.get("transactionDate")
     description = request.form.get("description")
-
     errors = []
+
+    # date is entered as a string in the format "DD/MM/YYYY" so we need to convert it to a datetime object
+    try:
+        date = datetime.strptime(date_input, "%d/%m/%Y")
+    except ValueError:
+        errors.append("Please enter a valid date.")
+
     if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
         errors.append("Please enter a valid cryptocurrency amount.")
 
@@ -249,7 +422,7 @@ def submit_crypto_sell():
             crypto_amount=cryptocurrency_amount,
             monetary_amount=monetary_amount,
             description=description,
-            date=None,
+            date=date,
         )
         db.session.add(add_to_crypto_sell)
 
