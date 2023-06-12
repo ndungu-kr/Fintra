@@ -3,13 +3,22 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-md-12 fw-bold fs-3 mb-3">Cryptocurrency Wallet</div>
+<!-- <div class="row row-cols-md mb-3"> -->
+
+<div class="row mb-2">
+    <div class="col-sm-8 fs-2 fw-bold mb-1 justify-content-start">Cryptocurrency Wallet</div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <!-- <button class="btn btn-primary me-md-2" type="button">Button</button> -->
+        <a class="btn btn-primary fs-5 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency" role="button">Buy</a>
+    </div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <a class="btn btn-success fs-5 w-100" href="/cryptocurrency-wallet/sell-cryptocurrency" role="button">Sell</a>
+    </div>
 </div>
 
-<!-- Sub-Wallet Metadata -->
+<!-- Asset Totals -->
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
             <div class="card-header">Cryptocurrency Balance</div>
             <div class="card-body">
@@ -17,9 +26,9 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss</div>
+            <div class="card-header">Profit/Loss (incl. withdrawals)</div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-8">
@@ -32,7 +41,23 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+</div>
+
+<!-- Graph -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-header">Cryptocurrency Portfolio Performance</div>
+            <div class="card-body">
+                <canvas id="cryptocurrencyPerformanceGraph"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users invested and withdrawals -->
+<div class="row">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
             <div class="card-header">Total Invested</div>
             <div class="card-body">
@@ -40,50 +65,11 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Monthly Breakdown -->
-<div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss this Month</div>
+            <div class="card-header">Total Withdrawals</div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-8">
-                        <h5 class="card-title">{{ profit_this_month }}</h5>
-                    </div>
-                    <div class="col-4 text-end">
-                        <p class="card-text">{{ profit_this_month_percentage }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Sold this Month</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ total_sold_this_month }}</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested this Month</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ total_invested_this_month }}</h5>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Graph -->
-<div class="row">
-    <div class="col-md-12 mb-3">
-        <div class="card">
-            <div class="card-header">Cryptocurrency Performance Graph</div>
-            <div class="card-body">
-                <canvas id="cryptocurrencyPerformanceGraph"></canvas>
+                <h5 class="card-title">{{ total_sold }}</h5>
             </div>
         </div>
     </div>
@@ -93,7 +79,7 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="card h-100">
-            <div class="card-header">Cryptocurrency Distribution Pie Chart</div>
+            <div class="card-header">Cryptocurrency Distribution</div>
             <div class="card-body">
                 <canvas id="cryptocurrencyDistribution" width="400" height="400"></canvas>
             </div>
@@ -109,81 +95,98 @@
     </div>
 </div>
 
-<!--Buy/Sell cryptocurrency-->
+<!-- Monthly breakdown -->
 <div class="row">
-    <div class="col-md-12 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Note Cryptocurrency Transaction</div>
+            <div class="card-header">Investments this Month</div>
             <div class="card-body">
-                <div class="container">
-                    <div class="row">
-                        <a class="btn btn-success m-1 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency"
-                            role="button">Buy</a>
-                        <a class="btn btn-success m-1 w-100" href="/cryptocurrency-wallet/sell-cryptocurrency"
-                            role="button">Sell</a>
-                    </div>
-                </div>
+                <h5 class="card-title">{{ total_invested_this_month }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Withdrawals This Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_sold_this_month }}</h5>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Owned cryptocurrencies -->
-<h5>Owned Cryptocurrency Assets</h5>
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Cryptocurrency</th>
-            <th scope="col">Amount Owned</th>
-            <th scope="col">Value</th>
-            <th scope="col" colspan="2">
-                <center>Profit/Loss</center>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if user_cryptos != None %}
-        {% for crypto in user_cryptos %}
-        <tr>
-            <td>{{ crypto.name }}</td>
-            <td>{{ crypto.quantity }}</td>
-            <td>${{ crypto.value }}</td>
-            <td>TBC</td>
-            <td>TBC</td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
+<!-- Owned cryptocurrency table -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light">
+            <div class="card-header">Owned Cryptocurrency Assets</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Cryptocurrency</th>
+                        <th scope="col">Amount Owned</th>
+                        <th scope="col">Value</th>
+                        <th scope="col" colspan="2">
+                            <center>Profit/Loss</center>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if user_cryptos != None %}
+                    {% for crypto in user_cryptos %}
+                    <tr>
+                        <td>{{ crypto.name }}</td>
+                        <td>{{ crypto.quantity }}</td>
+                        <td>${{ crypto.value }}</td>
+                        <td>TBC</td>
+                        <td>TBC</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <!-- Cryptocurrency transactions -->
-<h5>Cryptocurrency Asset Transactions</h5>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Cryptocurrency</th>
-            <th scope="col">Amount purchased/sold</th>
-            <th scope="col">Purchase/Sell price</th>
-            <th scope="col">Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if user_transactions != None %}
-        {% for transaction in user_transactions %}
-        <tr>
-            <td>{{ transaction.name }}</td>
-            {% if transaction.type == "Buy" %}
-            <td>{{ transaction.crypto_amount }} (Buy)</td>
-            {% else %}
-            <td>{{ transaction.crypto_amount }} (Sell)</td>
-            {% endif %}
-            <td>{{ transaction.value }}</td>
-            <td>{{ transaction.short_date }}</td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light">
+            <div class="card-header">Cryptocurrency Asset Transactions</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Cryptocurrency</th>
+                        <th scope="col">Amount purchased/sold</th>
+                        <th scope="col">Purchase/Sell price</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if user_transactions != None %}
+                    {% for transaction in user_transactions %}
+                    <tr>
+                        <td>{{ transaction.name }}</td>
+                        {% if transaction.type == "Buy" %}
+                        <td>{{ transaction.crypto_amount }} (Buy)</td>
+                        {% else %}
+                        <td>{{ transaction.crypto_amount }} (Sell)</td>
+                        {% endif %}
+                        <td>{{ transaction.value }}</td>
+                        <td>{{ transaction.short_date }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
     // Cryptocurrency Performance Chart
