@@ -104,7 +104,6 @@ def cryptocurrency_wallet():
             # total_invested += crypto.total_spent
 
             # # calculating the profit/loss on the cryptocurrency
-            # Use average spend here
             # crypto.profit = crypto.full_value - crypto.total_spent
             # if crypto.total_spent == 0:
             #     crypto.profit_percentage = 0
@@ -119,9 +118,7 @@ def cryptocurrency_wallet():
             #     crypto.profit = f"-${crypto.profit[1:]}"
             # crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
 
-        # getting all the users buy transactions, only picking the monetary values
-
-    # calculating total asset profit
+    ############### Calculating total asset profit ###############
     # first we get the users cryptocurrency transactions
     user_buy_transactions = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
@@ -174,7 +171,7 @@ def cryptocurrency_wallet():
     total_invested = f"${total_invested:,.2f}"
     total_withdrawn = f"${total_withdrawn:,.2f}"
 
-    # getting the users cryptocurrency transactions
+    ############### Getting the users monthly breakdown ###############
     user_buy_transactions2 = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()
@@ -185,10 +182,6 @@ def cryptocurrency_wallet():
     # calculating the total invested and sold this month
     total_invested_this_month = 0
     total_sold_this_month = 0
-    monetary_amount_gained_this_month = 0
-    total_spent_on_crypto_this_month = 0
-    value_of_rem_crypto_purchased_this_month = 0
-    remaining_crypto_quantities = {}
 
     for buy_transaction in user_buy_transactions2:
         if buy_transaction.date.month == datetime.now().month:
@@ -197,70 +190,11 @@ def cryptocurrency_wallet():
         if sell_transaction.date.month == datetime.now().month:
             total_sold_this_month += sell_transaction.monetary_amount
 
-    # calculating the total spent this month
-    for buy_transaction in user_buy_transactions2:
-        if buy_transaction.date.month == datetime.now().month:
-            total_spent_on_crypto_this_month += buy_transaction.monetary_amount
-            # put crypto code and quantity into dictionary
-            if buy_transaction.cryptocurrency_code in remaining_crypto_quantities:
-                remaining_crypto_quantities[
-                    buy_transaction.cryptocurrency_code
-                ] += buy_transaction.crypto_amount
-            else:
-                remaining_crypto_quantities[
-                    buy_transaction.cryptocurrency_code
-                ] = buy_transaction.crypto_amount
-
-    # calculating the value of the cryptocurrency sold this month
-    for sell_transaction in user_sell_transactions2:
-        if sell_transaction.date.month == datetime.now().month:
-            monetary_amount_gained_this_month += sell_transaction.monetary_amount
-        # subtracting the quantity of the cryptocurrency sold from the dictionary
-        if sell_transaction.cryptocurrency_code in remaining_crypto_quantities:
-            remaining_crypto_quantities[
-                sell_transaction.cryptocurrency_code
-            ] -= sell_transaction.crypto_amount
-        # situation where the user sold asset bought before this month
-        else:
-            remaining_crypto_quantities[
-                sell_transaction.cryptocurrency_code
-            ] = sell_transaction.crypto_amount
-
-    # calculating the value of the remaining cryptocurrency purchased this month
-    for crypto in remaining_crypto_quantities:
-        cryptocurrency_data = get_cryptocurrency_data(crypto)
-        value_of_rem_crypto_purchased_this_month += (
-            remaining_crypto_quantities[crypto] * cryptocurrency_data.current_price
-        )
-
-    print("monetary amount gained this month:", monetary_amount_gained_this_month)
-    print(
-        "value of remaining crypto purchased this month:",
-        value_of_rem_crypto_purchased_this_month,
-    )
-    print("total spent on crypto this month:", total_spent_on_crypto_this_month)
-
-    profit_this_month = (
-        monetary_amount_gained_this_month
-        + value_of_rem_crypto_purchased_this_month
-        - total_spent_on_crypto_this_month
-    )
-
-    if total_spent_on_crypto_this_month != 0:
-        profit_this_month_percentage = (
-            profit_this_month / total_spent_on_crypto_this_month
-        ) * 100
-        profit_this_month = f"${profit_this_month:,.2f}"
-        profit_this_month_percentage = f"{profit_this_month_percentage:,.2f}%"
-    else:
-        profit_this_month = "$0.00"
-        profit_this_month_percentage = "0.00%"
-
     # formating after as we need to calculate the total invested this month first
     total_invested_this_month = f"${total_invested_this_month:,.2f}"
     total_sold_this_month = f"${total_sold_this_month:,.2f}"
 
-    # calculating the profit this month
+    ############### Compiling transactions for transactions table ###############
     user_buy_transactions3 = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()
@@ -283,7 +217,6 @@ def cryptocurrency_wallet():
             transaction.name = cryptocurrency_data.name
             transaction.crypto_amount = round(transaction.crypto_amount, 6)
             # formatting the value to 2 decimal places and adding commas to thousands
-            # transaction.monetary amount is a string but i need to change it to a float to format it
             transaction.value = float(transaction.monetary_amount)
             transaction.value = f"${transaction.value:,.2f}"
             # changing the date to a string in the format "Day/Month/Year"
@@ -301,8 +234,6 @@ def cryptocurrency_wallet():
         total_sold_this_month=total_sold_this_month,
         user_cryptos=user_cryptos,
         user_transactions=user_transactions,
-        profit_this_month=profit_this_month,
-        profit_this_month_percentage=profit_this_month_percentage,
     )
 
 
