@@ -120,21 +120,6 @@ def cryptocurrency_wallet():
             # crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
 
         # getting all the users buy transactions, only picking the monetary values
-    user_total_invested = (
-        CryptocurrencyBuy.query.filter_by(user_id=current_user.id)
-        .with_entities(CryptocurrencyBuy.monetary_amount)
-        .all()
-    )
-    for buy in user_total_invested:
-        total_invested += buy[0]
-
-    user_total_sold = (
-        CryptocurrencySell.query.filter_by(user_id=current_user.id)
-        .with_entities(CryptocurrencySell.monetary_amount)
-        .all()
-    )
-    for sell in user_total_sold:
-        total_withdrawn += sell[0]
 
     # calculating total asset profit
     # first we get the users cryptocurrency transactions
@@ -145,41 +130,44 @@ def cryptocurrency_wallet():
         user_id=current_user.id
     ).all()
     total_monetary_gained = 0
-    total_asset_spend = 0
+    total_crypto_spend = 0
     value_of_remaining_assets = 0
     asset_quantities = {}
     # then we calculate the total spent
     for buy_tranz in user_buy_transactions:
-        total_asset_spend += buy_tranz.monetary_amount
+        total_crypto_spend += buy_tranz.monetary_amount
+        total_invested += buy_tranz.monetary_amount
         # if asset exists in dictionary, add to the quantity
         if buy_tranz.cryptocurrency_code in asset_quantities:
             asset_quantities[buy_tranz.cryptocurrency_code] += buy_tranz.crypto_amount
         else:
             asset_quantities[buy_tranz.cryptocurrency_code] = buy_tranz.crypto_amount
-
     # calculating value of asset sold
     for sell_tranz in user_sell_transactions:
         total_monetary_gained += sell_tranz.monetary_amount
+        total_withdrawn += sell_tranz.monetary_amount
         asset_quantities[sell_tranz.cryptocurrency_code] -= sell_tranz.crypto_amount
     # calculating value of remaining assets
     for asset in asset_quantities:
         crypto_data = get_cryptocurrency_data(asset)
         value_of_remaining_assets += asset_quantities[asset] * crypto_data.current_price
     # calculating total profit
-    total_asset_profit = (
-        total_monetary_gained + value_of_remaining_assets - total_asset_spend
+    total_crypto_profit = (
+        total_monetary_gained + value_of_remaining_assets - total_crypto_spend
     )
-    if total_asset_spend != 0:
-        total_asset_profit_percentage = (total_asset_profit / total_asset_spend) * 100
-        total_asset_profit_percentage = f"{total_asset_profit_percentage:,.2f}%"
-        if total_asset_profit >= 0:
-            total_asset_profit = f"${total_asset_profit:,.2f}"
-        elif total_asset_profit < 0:
-            total_asset_profit = total_asset_profit * -1
-            total_asset_profit = f"-${total_asset_profit:,.2f}"
+    if total_crypto_spend != 0:
+        total_crypto_profit_percentage = (
+            total_crypto_profit / total_crypto_spend
+        ) * 100
+        total_crypto_profit_percentage = f"{total_crypto_profit_percentage:,.2f}%"
+        if total_crypto_profit >= 0:
+            total_crypto_profit = f"${total_crypto_profit:,.2f}"
+        elif total_crypto_profit < 0:
+            total_crypto_profit = total_crypto_profit * -1
+            total_crypto_profit = f"-${total_crypto_profit:,.2f}"
     else:
-        total_asset_profit_percentage = "0.00%"
-        total_asset_profit = "$0.00"
+        total_crypto_profit_percentage = "0.00%"
+        total_crypto_profit = "$0.00"
 
     # formatting to 2 decimal places and adding commas to thousands
     total_crypto_balance = f"${crypto_balance:,.2f}"
@@ -305,8 +293,8 @@ def cryptocurrency_wallet():
         "cryptocurrency_wallet.html",
         user=current_user,
         total_crypto_balance=total_crypto_balance,
-        total_asset_profit=total_asset_profit,
-        total_asset_profit_percentage=total_asset_profit_percentage,
+        total_crypto_profit=total_crypto_profit,
+        total_crypto_profit_percentage=total_crypto_profit_percentage,
         total_invested=total_invested,
         total_withdrawn=total_withdrawn,
         total_invested_this_month=total_invested_this_month,
