@@ -61,12 +61,9 @@ def dashboard():
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
-    crypto_balance = 0
-    total_invested = 0
-    total_withdrawn = 0
-
-    # getting the total amount of cryptocurrency owned by the user
+    ############### Getting cryptocurrency asset totals for the user ###############
     user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
+    crypto_balance = 0
     if user_cryptos is not None:
         for crypto in user_cryptos:
             cryptocurrency_data = get_cryptocurrency_data(crypto.cryptocurrency_code)
@@ -83,43 +80,47 @@ def cryptocurrency_wallet():
             crypto_balance += crypto.full_value
 
             # formatting the value to 2 decimal places and adding commas to thousands
-            crypto.value = f"{crypto.full_value:,.2f}"
+            crypto.value = f"${crypto.full_value:,.2f}"
 
-            # # getting all the buy and sell instances for the specific cryptocurrency
-            # crypto.buy_instances = CryptocurrencyBuy.query.filter_by(
-            #     user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
-            # ).all()
-            # crypto.sell_instances = CryptocurrencySell.query.filter_by(
-            #     user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
-            # ).all()
+            # getting all the buy and sell instances for the specific cryptocurrency
+            crypto.buy_instances = CryptocurrencyBuy.query.filter_by(
+                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+            ).all()
+            crypto.sell_instances = CryptocurrencySell.query.filter_by(
+                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+            ).all()
 
-            # # calculating the total amount spent on the cryptocurrency
-            # total_spent_on_asset = 0
-            # for buy_instance in crypto.buy_instances:
-            #     total_spent_on_asset += buy_instance.monetary_amount
-            # for sell_instance in crypto.sell_instances:
-            #     total_spent_on_asset -= sell_instance.monetary_amount
-            # crypto.total_spent = total_spent_on_asset
+            # calculating the total amount spent on the cryptocurrency
+            spent_on_asset = 0
+            gained_on_asset = 0
 
-            # total_invested += crypto.total_spent
+            for buy_instance in crypto.buy_instances:
+                spent_on_asset += buy_instance.monetary_amount
+            for sell_instance in crypto.sell_instances:
+                gained_on_asset += sell_instance.monetary_amount
 
-            # # calculating the profit/loss on the cryptocurrency
-            # crypto.profit = crypto.full_value - crypto.total_spent
-            # if crypto.total_spent == 0:
-            #     crypto.profit_percentage = 0
-            # else:
-            #     crypto.profit_percentage = (crypto.profit / crypto.total_spent) * 100
-            # crypto.profit = f"{crypto.profit:,.2f}"
+            crypto.total_spent = spent_on_asset
+            crypto.total_gained = gained_on_asset
+            average_purchase_price = (
+                spent_on_asset * crypto.quantity
+            ) / crypto.quantity
+            crypto.average_purchase_price = average_purchase_price
 
-            # # adding "$" to the profit value
-            # if crypto.profit[0] != "-":
-            #     crypto.profit = f"${crypto.profit}"
-            # else:
-            #     crypto.profit = f"-${crypto.profit[1:]}"
-            # crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
+            # calculating the profit/loss on the cryptocurrency
+            crypto.profit = crypto.total_gained + crypto.full_value - crypto.total_spent
+            crypto.profit_percentage = (crypto.profit / crypto.total_spent) * 100
+            crypto.profit = f"{crypto.profit:,.2f}"
+
+            # adding "$" to the profit value
+            if crypto.profit[0] != "-":
+                crypto.profit = f"${crypto.profit}"
+            else:
+                crypto.profit = f"-${crypto.profit[1:]}"
+            crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
 
     ############### Calculating total asset profit ###############
-    # first we get the users cryptocurrency transactions
+    total_invested = 0
+    total_withdrawn = 0
     user_buy_transactions = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()

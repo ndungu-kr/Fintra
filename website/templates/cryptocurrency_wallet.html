@@ -129,7 +129,7 @@
                         <th scope="col">Amount Owned</th>
                         <th scope="col">Value</th>
                         <th scope="col" colspan="2">
-                            <center>Profit/Loss</center>
+                            <center>Profit/Loss(incl. withdrawals)</center>
                         </th>
                     </tr>
                 </thead>
@@ -139,9 +139,9 @@
                     <tr>
                         <td>{{ crypto.name }}</td>
                         <td>{{ crypto.quantity }}</td>
-                        <td>${{ crypto.value }}</td>
-                        <td>TBC</td>
-                        <td>TBC</td>
+                        <td>{{ crypto.value }}</td>
+                        <td>{{ crypto.profit }}</td>
+                        <td>{{ crypto.profit_percentage }}</td>
                     </tr>
                     {% endfor %}
                     {% else %}
