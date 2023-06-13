@@ -134,7 +134,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if user_cryptos != None %}
+                    {% if user_cryptos %}
                     {% for crypto in user_cryptos %}
                     <tr>
                         <td>{{ crypto.name }}</td>
@@ -144,6 +144,10 @@
                         <td>TBC</td>
                     </tr>
                     {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No cryptocurrency assets owned</td>
+                    </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -168,7 +172,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if user_transactions != None %}
+                    {% if user_transactions %}
                     {% for transaction in user_transactions %}
                     <tr>
                         <td>{{ transaction.name }}</td>
@@ -181,6 +185,10 @@
                         <td>{{ transaction.short_date }}</td>
                     </tr>
                     {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4">You have not made any cryptocurrency transactions</td>
+                    </tr>
                     {% endif %}
                 </tbody>
             </table>
