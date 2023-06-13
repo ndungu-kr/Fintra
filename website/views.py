@@ -432,7 +432,12 @@ def submit_crypto_sell():
         ).first()
         user_crypto_amount.quantity -= cryptocurrency_amount
 
+        # if the user has sold all of their cryptocurrency, delete the row from the table
+        if user_crypto_amount.quantity == 0:
+            db.session.delete(user_crypto_amount)
+
         db.session.commit()
+
         flash("Cryptocurrency successfully sold.", category="success")
         return redirect(url_for("views.cryptocurrency_wallet"))
 
