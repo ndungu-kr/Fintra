@@ -61,6 +61,20 @@ def dashboard():
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
+    ############### modal errors ###############
+    buy_modal_errors = request.args.get("buy_modal_errors")
+    sell_modal_errors = request.args.get("sell_modal_errors")
+
+    if buy_modal_errors is not None:
+        buy_modal_errors = json.loads(buy_modal_errors)
+    else:
+        buy_modal_errors = {}
+
+    if sell_modal_errors is not None:
+        sell_modal_errors = json.loads(sell_modal_errors)
+    else:
+        sell_modal_errors = {}
+
     ############### Getting cryptocurrency asset totals for the user ###############
     user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
     crypto_balance = 0
@@ -235,6 +249,8 @@ def cryptocurrency_wallet():
         total_sold_this_month=total_sold_this_month,
         user_cryptos=user_cryptos,
         user_transactions=user_transactions,
+        buy_modal_errors=buy_modal_errors,
+        sell_modal_errors=sell_modal_errors,
     )
 
 
@@ -251,39 +267,66 @@ def buy_cryptocurrency():
     return render_template("buy_cryptocurrency.html", user=current_user)
 
 
-@views.route("/submit-crypto-buy", methods=["POST"])
+@views.route("/submit-crypto-buy-modal", methods=["POST"])
 def submit_crypto_buy():
     cryptocurrency_code = request.form.get("cryptocurrency")
-    cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
-    monetary_amount = float(request.form.get("monetaryAmount"))
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
-    errors = []
-
-    # date is entered as a string in the format "DD/MM/YYYY" so we need to convert it to a datetime object
-    try:
-        date = datetime.strptime(date_input, "%d/%m/%Y")
-    except ValueError:
-        errors.append("Please enter a valid date.")
-
-    if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
-        errors.append("Please enter a valid cryptocurrency amount.")
-
-    if monetary_amount == 0 or monetary_amount < 0:
-        errors.append("Please enter a valid monetary value.")
+    modal_errors = []
 
     cryptocurrency_code_exists = Cryptocurrency.query.filter_by(
         code=cryptocurrency_code
     ).first()
-    if cryptocurrency_code_exists is None:
-        errors.append(
+
+    if cryptocurrency_code_exists is None or cryptocurrency_code is None:
+        modal_errors.append(
             "Cryptocurrency does not exist. Please select one from our selection."
         )
 
-    if len(errors) > 0:
-        for error in errors:
-            flash(error, category="error")
-        return render_template("buy_cryptocurrency.html", user=current_user)
+    try:
+        cryptocurrency_amount = decimal.Decimal(
+            request.form.get("cryptocurrencyAmount")
+        )
+    except decimal.InvalidOperation:
+        modal_errors.append("Please enter a cryptocurrency amount.")
+
+    try:
+        monetary_amount = float(request.form.get("monetaryAmount"))
+    except ValueError:
+        modal_errors.append("Please enter a monetary amount.")
+
+    try:
+        date = datetime.strptime(date_input, "%d/%m/%Y")
+    except ValueError:
+        modal_errors.append("Please enter a valid date.")
+
+    # checking that inputs were made
+    if len(modal_errors) > 0:
+        for error in modal_errors:
+            flash(error, category="modal_error")
+        buy_modal_errors = json.dumps(modal_errors)
+        return redirect(
+            url_for("views.cryptocurrency_wallet", buy_modal_errors=buy_modal_errors)
+        )
+
+    if (
+        cryptocurrency_amount == 0
+        or cryptocurrency_amount < 0
+        or cryptocurrency_amount is None
+    ):
+        modal_errors.append("Please enter a valid cryptocurrency amount.")
+
+    if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
+        modal_errors.append("Please enter a valid monetary value.")
+
+    if len(modal_errors) > 0:
+        for error in modal_errors:
+            flash(error, category="modal_error")
+        buy_modal_errors = json.dumps(modal_errors)
+        return redirect(
+            url_for("views.cryptocurrency_wallet", buy_modal_errors=buy_modal_errors)
+        )
+
     else:
         # adding transaction to buy cryptocurrency
         add_to_crypto_buy = CryptocurrencyBuy(
@@ -315,37 +358,63 @@ def submit_crypto_buy():
         return redirect(url_for("views.cryptocurrency_wallet"))
 
 
-@views.route("/submit-crypto-sell", methods=["POST"])
+@views.route("/submit-crypto-sell-modal", methods=["POST"])
 def submit_crypto_sell():
     cryptocurrency_code = request.form.get("cryptocurrency")
-    cryptocurrency_amount = decimal.Decimal(request.form.get("cryptocurrencyAmount"))
-    monetary_amount = float(request.form.get("monetaryAmount"))
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
-    errors = []
-
-    # date is entered as a string in the format "DD/MM/YYYY" so we need to convert it to a datetime object
-    try:
-        date = datetime.strptime(date_input, "%d/%m/%Y")
-    except ValueError:
-        errors.append("Please enter a valid date.")
-
-    if cryptocurrency_amount == 0 or cryptocurrency_amount < 0:
-        errors.append("Please enter a valid cryptocurrency amount.")
-
-    if monetary_amount == 0 or monetary_amount < 0:
-        errors.append("Please enter a valid monetary value.")
+    modal_errors = []
 
     user_owns_crypto = CryptocurrencyAmount.query.filter_by(
         cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
     ).first()
     if user_owns_crypto is None:
-        errors.append("You do not own this cryptocurrency.")
+        modal_errors.append("You do not own this cryptocurrency.")
 
-    if len(errors) > 0:
-        for error in errors:
-            flash(error, category="error")
-        return render_template("sell_cryptocurrency.html", user=current_user)
+    try:
+        cryptocurrency_amount = decimal.Decimal(
+            request.form.get("cryptocurrencyAmount")
+        )
+    except decimal.InvalidOperation:
+        modal_errors.append("Please enter a cryptocurrency amount.")
+
+    try:
+        monetary_amount = float(request.form.get("monetaryAmount"))
+    except ValueError:
+        modal_errors.append("Please enter a monetary amount.")
+
+    try:
+        date = datetime.strptime(date_input, "%d/%m/%Y")
+    except ValueError:
+        modal_errors.append("Please enter a valid date.")
+
+    # checking that inputs were made
+    if len(modal_errors) > 0:
+        for error in modal_errors:
+            flash(error, category="modal_error")
+        sell_modal_errors = json.dumps(modal_errors)
+        return redirect(
+            url_for("views.cryptocurrency_wallet", sell_modal_errors=sell_modal_errors)
+        )
+
+    # checking that the inputs made are valid
+    if (
+        cryptocurrency_amount == 0
+        or cryptocurrency_amount < 0
+        or cryptocurrency_amount is None
+    ):
+        modal_errors.append("Please enter a valid cryptocurrency amount.")
+
+    if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
+        modal_errors.append("Please enter a valid monetary value.")
+
+    if len(modal_errors) > 0:
+        for error in modal_errors:
+            flash(error, category="modal_error")
+        sell_modal_errors = json.dumps(modal_errors)
+        return redirect(
+            url_for("views.cryptocurrency_wallet", sell_modal_errors=sell_modal_errors)
+        )
     else:
         # adding transaction to sell cryptocurrency
         add_to_crypto_sell = CryptocurrencySell(

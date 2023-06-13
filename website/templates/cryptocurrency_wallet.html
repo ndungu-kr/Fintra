@@ -8,11 +8,146 @@
 <div class="row mb-2">
     <div class="col-sm-8 fs-2 fw-bold mb-1 justify-content-start">Cryptocurrency Wallet</div>
     <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-        <!-- <button class="btn btn-primary me-md-2" type="button">Button</button> -->
-        <a class="btn btn-primary fs-5 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency" role="button">Buy</a>
+        <!-- <a class="btn btn-primary fs-5 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency" role="button">Buy</a> -->
+        <button id="openBuyModal" class="btn btn-primary fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#buyModal">Buy</button>
     </div>
     <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-        <a class="btn btn-success fs-5 w-100" href="/cryptocurrency-wallet/sell-cryptocurrency" role="button">Sell</a>
+        <!-- <a class="btn btn-success fs-5 w-100" href="/cryptocurrency-wallet/sell-cryptocurrency" role="button">Sell</a> -->
+        <button id="openSellModal" class="btn btn-success fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#sellModal">Sell</button>
+    </div>
+</div>
+
+<div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/submit-crypto-buy-modal" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="buyModalLabel">Buy Cryptocurrency</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if buy_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in buy_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="cryptocurrencyDataList" class="form-label">Cryptocurrency</label>
+                        <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList"
+                            name="cryptocurrency" placeholder="Type to search...">
+                        <datalist id="cryptocurrencyOptions">
+                            <option value="BTC">
+                            <option value="ETH">
+                            <option value="USDT">
+                        </datalist>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="cryptocurrencyAmount" name="cryptocurrencyAmount" type="text"
+                                class="form-control" placeholder="Amount" aria-label="Amount">
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="monetaryAmount" name="monetaryAmount" type="text" class="form-control"
+                                    placeholder="Cash" aria-label="Cash">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="transactionDate" name="transactionDate" type="text" class="form-control"
+                                placeholder="DD/MM/YYYY" aria-label="Amount">
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" name="description" placeholder="Leave a comment here"
+                            id="transactionDescription"></textarea>
+                        <label for="transactionDescription">Description (optional)</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sellModal" tabindex="-1" aria-labelledby="sellModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/submit-crypto-sell-modal" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="sellModalLabel">Sell Cryptocurrency</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if sell_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in sell_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="cryptocurrencyDataList" class="form-label">Cryptocurrency</label>
+                        <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList"
+                            name="cryptocurrency" placeholder="Type to search...">
+                        <datalist id="cryptocurrencyOptions">
+                            <option value="BTC">
+                            <option value="ETH">
+                            <option value="USDT">
+                        </datalist>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="cryptocurrencyAmount" name="cryptocurrencyAmount" type="text"
+                                class="form-control" placeholder="Amount" aria-label="Amount">
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="monetaryAmount" name="monetaryAmount" type="text" class="form-control"
+                                    placeholder="Cash" aria-label="Cash">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="transactionDate" name="transactionDate" type="text" class="form-control"
+                                placeholder="DD/MM/YYYY" aria-label="Amount">
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" name="description" placeholder="Leave a comment here"
+                            id="transactionDescription"></textarea>
+                        <label for="transactionDescription">Description (optional)</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -197,6 +332,26 @@
 </div>
 
 <script>
+    // Open the modal automatically when there are modal errors
+    // Buy modal
+    // Pass errors to JavaScript from Python
+    var buyModalErrors = JSON.parse('{{ buy_modal_errors | default("[]") | tojson | safe }}');
+    if (Array.isArray(buyModalErrors) && buyModalErrors.length > 0) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var buyModalButton = document.getElementById('openBuyModal');
+            buyModalButton.click();
+        });
+    }
+    // Sell modal
+    // Pass errors to JavaScript from Python
+    var sellModalErrors = JSON.parse('{{ sell_modal_errors | default("[]") | tojson | safe }}');
+    if (Array.isArray(sellModalErrors) && sellModalErrors.length > 0) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var sellModalButton = document.getElementById('openSellModal');
+            sellModalButton.click();
+        });
+    }
+
     // Cryptocurrency Performance Chart
     const cty = document.getElementById('cryptocurrencyPerformanceGraph');
     new Chart(cty, {
