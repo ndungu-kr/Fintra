@@ -78,6 +78,7 @@ def cryptocurrency_wallet():
     ############### Getting cryptocurrency asset totals for the user ###############
     user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
     crypto_balance = 0
+    user_crypto_values = {}
     if user_cryptos is not None:
         for crypto in user_cryptos:
             cryptocurrency_data = get_cryptocurrency_data(crypto.cryptocurrency_code)
@@ -89,6 +90,10 @@ def cryptocurrency_wallet():
             # calculating the total value of the cryptocurrency
             crypto.full_value = crypto.quantity * crypto.price
             crypto.quantity = round(crypto.quantity, 6)
+
+            # adding names and values to the dict for the charts
+            crypto.formatted_value = f"{crypto.full_value:.1f}"
+            user_crypto_values[crypto.name] = crypto.formatted_value
 
             # adding the value of the cryptocurrency to the total crypto balance
             crypto_balance += crypto.full_value
@@ -251,6 +256,7 @@ def cryptocurrency_wallet():
         user_transactions=user_transactions,
         buy_modal_errors=buy_modal_errors,
         sell_modal_errors=sell_modal_errors,
+        user_crypto_values=user_crypto_values,
     )
 
 

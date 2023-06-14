@@ -368,34 +368,53 @@
         },
     });
 
+    var userCryptoValues = {{ user_crypto_values | tojson | safe }};
+
+    for (var key in userCryptoValues) {
+        userCryptoValues[key] = parseInt(userCryptoValues[key]);
+    }
+
     // Cryptocurrency Distribution Chart
+    var cryptoNames = Object.keys(userCryptoValues);
+    var cryptoValues = Object.values(userCryptoValues);
     const ctz = document.getElementById('cryptocurrencyDistribution');
     new Chart(ctz, {
         type: 'doughnut',
         data: {
-            labels: ['Bitcoin', 'Ethereum', 'Cardano'],
+            labels: cryptoNames,
             datasets: [{
-                label: 'My First Dataset',
-                data: [300, 50, 100],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
+                label: 'Cryptocurrency Distribution',
+                data: cryptoValues,
                 hoverOffset: 4
             }]
         },
     });
 
     // Positions by Market Value Chart
+    var cryptoArray = Object.entries(userCryptoValues);
+
+    cryptoArray.sort(function (a, b) {
+        return b[1] - a[1];
+    });
+
+    var top3Cryptos = cryptoArray.slice(0, 3);
+
+    var cryptoLabels = top3Cryptos.map(function (pair) {
+        return pair[0];
+    });
+
+    var cryptoValues = top3Cryptos.map(function (pair) {
+        return pair[1];
+    });
+
     const ctx = document.getElementById('cryptoPositionsByMarketValue');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Bitcoin', 'Ethereum', 'Cardano'],
+            labels: cryptoLabels,
             datasets: [{
                 label: 'Value in USD',
-                data: [12000, 1900, 3000],
+                data: cryptoValues,
                 borderWidth: 1
             }]
         },
