@@ -284,8 +284,6 @@ def submit_crypto_buy():
         code=cryptocurrency_code
     ).first()
 
-    print("cryptocurrency_code", cryptocurrency_code)
-
     if len(cryptocurrency_code) == 0:
         modal_errors.append("Please select a cryptocurrency.")
     elif cryptocurrency_code_exists is None:
