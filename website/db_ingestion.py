@@ -66,7 +66,15 @@ def crypto_data_insert(latest_cryptocurrency_file):
             session.commit()
             session.close()
 
-            print(added_counter, " New Cryptocurrencies added")
-            print(updated_counter, " Cryptocurrencies updated")
+            print(
+                "##### Database Update: ",
+                added_counter,
+                " New Cryptocurrencies added #####",
+            )
+            print(
+                "##### Database Update: ",
+                updated_counter,
+                " Cryptocurrencies updated #####",
+            )
     except:
         print("No changes made to db")

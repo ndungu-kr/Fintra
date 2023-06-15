@@ -7,34 +7,45 @@
     <div class="col-md-12 fw-bold fs-3 mb-3">Buy Cryptocurrency</div>
 </div>
 
-<form>
+<form action="/submit-crypto-buy" method="POST">
     <div class="mb-3">
         <label for="cryptocurrencyDataList" class="form-label">Cryptocurrency</label>
-        <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList"
+        <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList" name="cryptocurrency"
             placeholder="Type to search...">
         <datalist id="cryptocurrencyOptions">
-            <option value="Bitcoin">
-            <option value="Ethereum">
-            <option value="Cardano">
+            <option value="BTC">
+            <option value="ETH">
+            <option value="USDT">
         </datalist>
     </div>
 
     <div class="row mb-3">
         <div class="col">
-            <input id="cryptocurrencyAmount" type="text" class="form-control" placeholder="Amount" aria-label="Amount">
+            <input id="cryptocurrencyAmount" name="cryptocurrencyAmount" type="text" class="form-control"
+                placeholder="Amount" aria-label="Amount">
         </div>
         <div class="col">
             <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input id="monetaryAmount" type="text" class="form-control" placeholder="Cash" aria-label="Cash">
+                <input id="monetaryAmount" name="monetaryAmount" type="text" class="form-control" placeholder="Cash"
+                    aria-label="Cash">
             </div>
         </div>
     </div>
 
+    <div class="row mb-3">
+        <div class="col">
+            <input id="transactionDate" name="transactionDate" type="text" class="form-control" placeholder="DD/MM/YYYY"
+                aria-label="Amount">
+        </div>
+    </div>
+
     <div class="form-floating mb-3">
-        <textarea class="form-control" placeholder="Leave a comment here" id="transactionDescription"></textarea>
+        <textarea class="form-control" name="description" placeholder="Leave a comment here"
+            id="transactionDescription"></textarea>
         <label for="transactionDescription">Description (optional)</label>
     </div>
+
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

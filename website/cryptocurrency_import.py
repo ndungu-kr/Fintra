@@ -90,8 +90,16 @@ def crypto_data_to_db(cryptos):
                     session.commit()
                     added_counter = added_counter + 1
 
-        print(added_counter, " New Cryptocurrencies added")
-        print(updated_counter, " Cryptocurrencies updated")
+        print(
+            "##### Database Update: ",
+            added_counter,
+            " New Cryptocurrencies added #####",
+        )
+        print(
+            "##### Database Update: ",
+            updated_counter,
+            " Cryptocurrencies updated #####",
+        )
 
     except Exception as e:
         print(f"Error inserting data into cryptocurrency table: {e}")

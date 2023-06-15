@@ -38,8 +38,8 @@
                         <span class="navbar-text">
                             $0.00
                         </span>
-                        <button type="button" class="btn btn-primary btn-sm m-1 w-100">Deposit</button>
-                        <button type="button" class="btn btn-secondary btn-sm m-1 w-100">Withdraw</button>
+                        <!-- <button type="button" class="btn btn-primary btn-sm m-1 w-100">Buy</button>
+                        <button type="button" class="btn btn-secondary btn-sm m-1 w-100">Sell</button> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -202,6 +202,7 @@
                 {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                 {% for category, message in messages %}
+                {% if category != "modal_error" %}
                 {% if category == "error" %}
                 <div class="alert alert-warning" role="alert">
                     {{ message }}
@@ -210,6 +211,7 @@
                 <div class="alert alert-success" role="alert">
                     {{ message }}
                 </div>
+                {% endif %}
                 {% endif %}
                 {% endfor %}
                 {% endif %}

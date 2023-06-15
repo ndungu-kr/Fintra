@@ -84,8 +84,6 @@ def check_latest_update(asset):
             .first()
         )
 
-        print("######   result  ######", result)
-
         if result:
             last_updated = result.last_updated
             session.commit()
@@ -119,8 +117,8 @@ def determine_validity(asset, last_updated):
 
     # returns True if the data is still valid, False if it is not
     if expiry_time:
-        print("###### EXPIRY TIME ######", expiry_time)
-        print("###### CURRENT TIME ######", current_time)
+        # print("###### EXPIRY TIME ######", expiry_time)
+        # print("###### CURRENT TIME ######", current_time)
         if current_time > expiry_time:
             return False
         else:
@@ -140,7 +138,6 @@ def update_last_updated(asset):
         print(f"Error connecting to the database: {e}")
     # Checking if last updated time exists
     Session = sessionmaker(bind=engine)
-    print("asset", asset)
     with Session() as session:
         record_exists = session.query(AssetLastUpdated).filter_by(asset=asset).first()
         try:
