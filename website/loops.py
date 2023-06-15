@@ -8,6 +8,8 @@ from website.cryptocurrency_import import crypto_import
 from website.currency_import import initial_currency_import, currency_import
 from sqlalchemy.orm import sessionmaker
 
+from website.stock_import import stock_import
+
 
 def start_crypto_thread():
     def generate_crypto_data():
@@ -27,10 +29,10 @@ def start_crypto_thread():
             time.sleep(60)
 
     # Start the crypto generation loop on a 1st thread
-    crypto_csv_thread = threading.Thread(target=generate_crypto_data)
+    crypto_thread = threading.Thread(target=generate_crypto_data)
     # Making daemon to allow crtl + c stop to app
-    crypto_csv_thread.daemon = True
-    crypto_csv_thread.start()
+    crypto_thread.daemon = True
+    crypto_thread.start()
 
 
 def start_currency_thread():
@@ -56,13 +58,33 @@ def start_currency_thread():
             time.sleep(60)
 
     # Start the currency generation loop on a 2nd thread
-    currency_csv_thread = threading.Thread(target=generate_currency_data)
-    currency_csv_thread.daemon = True
-    currency_csv_thread.start()
+    currency_thread = threading.Thread(target=generate_currency_data)
+    currency_thread.daemon = True
+    currency_thread.start()
 
 
 def start_stock_thread():
-    pass
+    def generate_stock_data():
+        asset = "stock"
+        while True:
+            try:
+                last_updated = check_latest_update(asset)
+                print(f"Last updated time for Stock: {last_updated}")
+            except Exception as e:
+                print(f"Error checking last updated time: {e}")
+
+            if determine_validity(asset, last_updated) == True:
+                print("###### STOCK DATA IS UP TO DATE ######")
+            elif determine_validity(asset, last_updated) == False:
+                print("###### STOCK DATA IS OUT OF DATE, ACQUIRING NEW DATA ######")
+                stock_import()
+            time.sleep(60)
+
+    # Start the crypto generation loop on a 1st thread
+    stock_thread = threading.Thread(target=generate_stock_data)
+    # Making daemon to allow crtl + c stop to app
+    stock_thread.daemon = True
+    stock_thread.start()
 
 
 def check_latest_update(asset):
@@ -96,8 +118,8 @@ def check_latest_update(asset):
 def determine_validity(asset, last_updated):
     # Set validity period based on asset type in minutes
     if asset == "cryptocurrency":
-        # 7 minutes for Crypto data updates
-        validity_period = 7
+        # 30 minutes for Crypto data updates
+        validity_period = 30
     elif asset == "currency":
         # 1 hour for Currency data updates
         validity_period = 60

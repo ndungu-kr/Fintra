@@ -11,7 +11,7 @@ def crypto_import():
     api_key = "175fea6e-3c78-4ea7-82af-7fbe9f03a6a5"
 
     # URL for the API endpoint
-    url = f"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=500&convert=USD"
+    url = f"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=1000"
 
     # Setting header with API key
     headers = {"Accepts": "application/json", "X-CMC_PRO_API_KEY": api_key}
