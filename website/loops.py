@@ -139,8 +139,6 @@ def determine_validity(asset, last_updated):
 
     # returns True if the data is still valid, False if it is not
     if expiry_time:
-        # print("###### EXPIRY TIME ######", expiry_time)
-        # print("###### CURRENT TIME ######", current_time)
         if current_time > expiry_time:
             return False
         else:
