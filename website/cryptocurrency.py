@@ -226,12 +226,6 @@ def get_cryptocurrency_data(cryptocurrency_code):
     return cryptocurrency_data
 
 
-@views.route("/cryptocurrency-wallet/buy-cryptocurrency", methods=["GET", "POST"])
-@login_required
-def buy_cryptocurrency():
-    return render_template("buy_cryptocurrency.html", user=current_user)
-
-
 @views.route("/submit-crypto-buy-modal", methods=["POST"])
 def submit_crypto_buy():
     cryptocurrency_code = request.form.get("cryptocurrency")

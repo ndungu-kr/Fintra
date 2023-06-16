@@ -15,6 +15,12 @@ def dashboard():
     return render_template("dashboard.html", user=current_user)
 
 
+@views.route("/cryptocurrency-wallet/buy-cryptocurrency", methods=["GET", "POST"])
+@login_required
+def buy_cryptocurrency():
+    return render_template("buy_cryptocurrency.html", user=current_user)
+
+
 @views.route("/cryptocurrency-wallet/sell-cryptocurrency", methods=["GET", "POST"])
 @login_required
 def sell_cryptocurrency():
