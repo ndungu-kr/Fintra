@@ -35,9 +35,9 @@ def start_application():
 
 if __name__ == "__main__":
     with app.app_context():
-        start_crypto_thread()
         start_currency_thread()
-        # start_stock_thread()
+        start_crypto_thread()
+        start_stock_thread()
     start_application()
 
     # # Start app on a 1st thread

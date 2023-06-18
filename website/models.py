@@ -132,10 +132,17 @@ class Currency(db.Model):
 
 class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(5))
+    code = db.Column(db.String(5), nullable=False)
     name = db.Column(db.String(200), nullable=False)
-    current_price = db.Column(db.DECIMAL, nullable=False)
-    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    price = db.Column(db.DECIMAL)
+    usd_price = db.Column(db.DECIMAL)
+    exchange = db.Column(db.String(200))
+    market_cap = db.Column(db.DECIMAL, nullable=False, default=0)
+    country = db.Column(db.String(200))
+    currency = db.Column(db.String(200))
+    sector = db.Column(db.String(200))
+    price_date = db.Column(db.DateTime)
+    last_updated = db.Column(db.DateTime)
     stock_purchased = db.relationship("StockBuy", backref="stock_purchased", lazy=True)
     stock_sold = db.relationship("StockSell", backref="stock_sold", lazy=True)
     stock_asstet_amounts = db.relationship(

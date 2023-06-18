@@ -3,53 +3,172 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-md-12 fw-bold fs-3 mb-3">Stocks Wallet</div>
-</div>
-
-<!-- Sub-Wallet Metadata -->
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Stocks Balance</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
+<div class="row mb-2">
+    <div class="col-sm-8 fs-2 fw-bold mb-1 justify-content-start">Stock Wallet</div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <button id="openBuyModal" class="btn btn-primary fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#buyModal">Buy</button>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <button id="openSellModal" class="btn btn-success fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#sellModal">Sell</button>
     </div>
 </div>
 
-<!-- Monthly Breakdown -->
+<div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/submit-stock-buy-modal" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="buyModalLabel">Buy Stock</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if buy_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in buy_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="assetDataList" class="form-label">Stock</label>
+                        <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
+                            placeholder="Type to search...">
+                        <datalist id="assetOptions">
+                            <option value="GOOG">
+                            <option value="TSLA">
+                            <option value="AAPL">
+                        </datalist>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="assetAmount" name="assetAmount" type="text" class="form-control"
+                                placeholder="Amount" aria-label="Amount">
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="monetaryAmount" name="monetaryAmount" type="text" class="form-control"
+                                    placeholder="Cash" aria-label="Cash">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="transactionDate" name="transactionDate" type="text" class="form-control"
+                                placeholder="DD/MM/YYYY" aria-label="Amount">
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" name="description" placeholder="Leave a comment here"
+                            id="transactionDescription"></textarea>
+                        <label for="transactionDescription">Description (optional)</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sellModal" tabindex="-1" aria-labelledby="sellModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/submit-stock-sell-modal" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="sellModalLabel">Sell Stock</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if sell_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in sell_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="assetDataList" class="form-label">Stock</label>
+                        <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
+                            placeholder="Type to search...">
+                        <datalist id="assetOptions">
+                            <option value="GOOG">
+                            <option value="TSLA">
+                            <option value="AAPL">
+                        </datalist>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="assetAmount" name="assetAmount" type="text" class="form-control"
+                                placeholder="Amount" aria-label="Amount">
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="monetaryAmount" name="monetaryAmount" type="text" class="form-control"
+                                    placeholder="Cash" aria-label="Cash">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input id="transactionDate" name="transactionDate" type="text" class="form-control"
+                                placeholder="DD/MM/YYYY" aria-label="Amount">
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" name="description" placeholder="Leave a comment here"
+                            id="transactionDescription"></textarea>
+                        <label for="transactionDescription">Description (optional)</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Asset Totals -->
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested this Month</div>
+            <div class="card-header">Stock Balance</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <h5 class="card-title">{{ total_asset_balance }}</h5>
             </div>
         </div>
     </div>
     <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss this Month</div>
+            <div class="card-header">Profit/Loss (incl. withdrawals)</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">{{ total_asset_profit }}</h5>
+                    </div>
+                    <div class="col-4 text-end">
+                        <p class="card-text">{{ total_asset_profit_percentage }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -59,9 +178,29 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card">
-            <div class="card-header">Stock Performance Graph</div>
+            <div class="card-header">Stock Portfolio Performance</div>
             <div class="card-body">
                 <canvas id="stockPerformanceGraph"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users invested and withdrawals -->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_invested }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Withdrawals</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_withdrawn }}</h5>
             </div>
         </div>
     </div>
@@ -71,7 +210,7 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="card h-100">
-            <div class="card-header">Stock Distribution Pie Chart</div>
+            <div class="card-header">Stock Distribution</div>
             <div class="card-body">
                 <canvas id="stockDistribution" width="400" height="400"></canvas>
             </div>
@@ -87,68 +226,128 @@
     </div>
 </div>
 
-<!--Buy/Sell stock-->
+<!-- Monthly breakdown -->
 <div class="row">
-    <div class="col-md-12 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Note Stock Transaction</div>
+            <div class="card-header">Investments this Month</div>
             <div class="card-body">
-                <div class="container">
-                    <div class="row">
-                        <a class="btn btn-success m-1 w-100" href="/stock-wallet/buy-stock" role="button">Buy</a>
-                        <a class="btn btn-success m-1 w-100" href="/stock-wallet/sell-stock" role="button">Sell</a>
-                    </div>
-                </div>
+                <h5 class="card-title">{{ total_invested_this_month }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Withdrawals This Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_sold_this_month }}</h5>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Owned stocks -->
-<h5>Owned Stock Assets</h5>
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Stocks</th>
-            <th scope="col">Stocks Owned</th>
-            <th scope="col">Value</th>
-            <th scope="col">Profit/Loss</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Tesla</td>
-            <td>100</td>
-            <td>$1000</td>
-            <td>100%</td>
-        </tr>
-    </tbody>
-</table>
+<!-- Owned stock table -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light">
+            <div class="card-header">Owned Stock Assets</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Amount Owned</th>
+                        <th scope="col">Value</th>
+                        <th scope="col" colspan="2">
+                            <center>Profit/Loss(incl. withdrawals)</center>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if user_assets %}
+                    {% for asset in user_assets %}
+                    <tr>
+                        <td>{{ asset.name }}({{ asset.code }})</td>
+                        <td>{{ asset.quantity }}</td>
+                        <td>{{ asset.value }}</td>
+                        <td>{{ asset.profit }}</td>
+                        <td>{{ asset.profit_percentage }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No stock assets owned</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <!-- Stock transactions -->
-<h5>Stock Asset Transactions</h5>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Stock</th>
-            <th scope="col">Amount purchased/sold</th>
-            <th scope="col">Purchase/Sell price</th>
-            <th scope="col">Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th scope="row">Tesla</th>
-            <td>100</td>
-            <td>50</td>
-            <td>10/11/2022</td>
-        </tr>
-    </tbody>
-</table>
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light">
+            <div class="card-header">Stock Asset Transactions</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Amount purchased/sold</th>
+                        <th scope="col">Purchase/Sell price</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if user_transactions %}
+                    {% for transaction in user_transactions %}
+                    <tr>
+                        <td>{{ transaction.name }}</td>
+                        {% if transaction.type == "Buy" %}
+                        <td>{{ transaction.asset_amount }} (Buy)</td>
+                        {% else %}
+                        <td>{{ transaction.asset_amount }} (Sell)</td>
+                        {% endif %}
+                        <td>{{ transaction.value }}</td>
+                        <td>{{ transaction.short_date }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4">You have not made any stock transactions</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
+    // Open the modal automatically when there are modal errors
+    // Buy modal
+    // Pass errors to JavaScript from Python
+    var buyModalErrors = JSON.parse('{{ buy_modal_errors | default("[]") | tojson | safe }}');
+    if (Array.isArray(buyModalErrors) && buyModalErrors.length > 0) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var buyModalButton = document.getElementById('openBuyModal');
+            buyModalButton.click();
+        });
+    }
+    // Sell modal
+    // Pass errors to JavaScript from Python
+    var sellModalErrors = JSON.parse('{{ sell_modal_errors | default("[]") | tojson | safe }}');
+    if (Array.isArray(sellModalErrors) && sellModalErrors.length > 0) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var sellModalButton = document.getElementById('openSellModal');
+            sellModalButton.click();
+        });
+    }
+
     // Stock Performance Chart
     const cty = document.getElementById('stockPerformanceGraph');
     new Chart(cty, {
@@ -165,34 +364,53 @@
         },
     });
 
+    var userAssetValues = {{ user_asset_values | tojson | safe }};
+
+    for (var key in userAssetValues) {
+        userAssetValues[key] = parseInt(userAssetValues[key]);
+    }
+
     // Stock Distribution Chart
+    var assetNames = Object.keys(userAssetValues);
+    var assetValues = Object.values(userAssetValues);
     const ctz = document.getElementById('stockDistribution');
     new Chart(ctz, {
         type: 'doughnut',
         data: {
-            labels: ['Tesla', 'Apple', 'Microsoft'],
+            labels: assetNames,
             datasets: [{
-                label: 'My First Dataset',
-                data: [300, 50, 100],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
+                label: 'Stock Distribution',
+                data: assetValues,
                 hoverOffset: 4
             }]
         },
     });
 
     // Positions by Market Value Chart
+    var assetArray = Object.entries(userAssetValues);
+
+    assetArray.sort(function (a, b) {
+        return b[1] - a[1];
+    });
+
+    var top3Assets = assetArray.slice(0, 3);
+
+    var assetLabels = top3Assets.map(function (pair) {
+        return pair[0];
+    });
+
+    var assetValues = top3Assets.map(function (pair) {
+        return pair[1];
+    });
+
     const ctx = document.getElementById('stockPositionsByMarketValue');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Tesla', 'Apple', 'Microsoft'],
+            labels: assetLabels,
             datasets: [{
                 label: 'Value in USD',
-                data: [12000, 1900, 3000],
+                data: assetValues,
                 borderWidth: 1
             }]
         },

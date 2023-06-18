@@ -124,8 +124,8 @@ def determine_validity(asset, last_updated):
         # 1 hour for Currency data updates
         validity_period = 60
     elif asset == "stock":
-        # 1 hour for Stock data updates
-        validity_period = 60
+        # 1 minutes for Stock data updates
+        validity_period = 1
 
     if last_updated:
         expiry_time = last_updated + timedelta(minutes=validity_period)
@@ -152,12 +152,12 @@ def update_last_updated(asset):
 
     try:
         engine = create_engine("sqlite:///./instance/database.db")
-        # Session = sessionmaker(bind=engine)
-        # session = Session()
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
+
     # Checking if last updated time exists
     Session = sessionmaker(bind=engine)
+
     with Session() as session:
         record_exists = session.query(AssetLastUpdated).filter_by(asset=asset).first()
         try:
