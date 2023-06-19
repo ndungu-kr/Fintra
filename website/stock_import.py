@@ -2,12 +2,13 @@ from datetime import datetime
 from sqlite3 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from website.models import Stock
+from website.models import Currency, Stock
 import yfinance as yf
 from requests import Session
 from requests_cache import CacheMixin, SQLiteCache
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from pyrate_limiter import Duration, RequestRate, Limiter
+import decimal
 
 
 class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
@@ -24,18 +25,28 @@ yf.pdr_override()  # Overrides the default requests session used by yfinance
 yf.session = session
 
 
-def stock_import():
-    try:
-        engine = create_engine("sqlite:///./instance/database.db")
-        dbSession = sessionmaker(bind=engine)
-    except OperationalError as e:
-        print(f"Error connecting to the database: {e}")
+class DbSession:
+    def __init__(self):
+        try:
+            engine = create_engine("sqlite:///./instance/database.db")
+            self.dbSession = sessionmaker(bind=engine)
+        except OperationalError as e:
+            print(f"Error connecting to the database: {e}")
 
+    def __enter__(self):
+        self.sesh = self.dbSession()
+        return self.sesh
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.sesh.close()
+
+
+def stock_import():
     stock_tickers = []
 
     # getting stock codes from the database
-    with dbSession() as session:
-        user_stocks = session.query(Stock).all()
+    with DbSession() as sesh:
+        user_stocks = sesh.query(Stock).all()
 
     if len(user_stocks) > 0:
         # Only update stocks that haven't been updated today
@@ -62,58 +73,70 @@ def stock_import():
             return
 
         if stock_tickers:
-            data = get_stock_prices(stock_tickers)
-        else:
-            print("########### NO NEW STOCKS FOUND IN TABLE ###########")
-            return False
+            try:
+                data = get_stock_prices(stock_tickers)
+            except Exception as e:
+                print(f"Error retrieving stock prices: {e}")
+                return False
 
-        try:
-            with dbSession() as session:
-                updated_counter = 0
+            update_prices(stock_tickers, data)
 
-                if len(stock_tickers) > 1:
-                    # Get the values from the dataframe
-                    tickers = data["Ticker"]
-                    close_prices = data["Close"]
-                    dates = data.index
-
-                    # Print the values
-                    for ticker, close, date in zip(tickers, close_prices, dates):
-                        stock = session.query(Stock).filter_by(code=ticker).first()
-                        stock.price = close
-                        stock.price_date = date
-                        stock.last_updated = datetime.now()
-
-                        session.commit()
-
-                        updated_counter += 1
-                else:
-                    ticker, close, date = data
-                    stock = session.query(Stock).filter_by(code=ticker).first()
-                    stock.price = close
-                    stock.price_date = date
-                    stock.last_updated = datetime.now()
-
-                    session.commit()
-
-                    updated_counter += 1
-
-                print(
-                    "##### Database Update: ",
-                    updated_counter,
-                    "Stocks updated #####",
-                )
-                # Update the last updated date for stocks
+            # Update the last updated date for stocks
             from website.loops import update_last_updated
 
             asset = "stock"
             update_last_updated(asset)
 
-        except Exception as e:
-            print(f"Error updating stocks table: {e}")
+        else:
+            print("########### NO NEW STOCKS FOUND IN TABLE ###########")
+            return False
 
     else:
         print("########### NO STOCKS FOUND IN TABLE ###########")
+        return False
+
+
+def stock_validity_check(asset_code):
+    # first we check the stock exists and has information available
+    data_available, stock_info = yfinance_check(asset_code)
+    if data_available is False:
+        return False
+
+    # then we check if it has the last trading days price information
+    ticker = []
+    ticker.append(asset_code)
+
+    stock_prices = get_stock_prices(ticker)
+
+    if stock_prices is False:
+        return False
+
+    # we then check it has the relevant information and add stock info to the database if true
+    add_to_db = add_stock(asset_code, stock_info)
+    if add_to_db is False:
+        return False
+
+    # if all checks are passed, we update the stock price
+    update_prices(ticker, stock_prices)
+
+    return True
+
+
+def yfinance_check(asset_code):
+    stock_info = get_stock_info(asset_code)
+
+    if stock_info is False:
+        return False
+
+    return True, stock_info
+
+
+def get_stock_info(asset_code):
+    try:
+        stock_info = yf.Ticker(asset_code)
+        return stock_info.info
+    except Exception as e:
+        print(f"Error retrieving stock info for {asset_code}: {str(e)}")
         return False
 
 
@@ -121,8 +144,12 @@ def get_stock_prices(tickers):
     # Make API requests for a group of tickers while respecting rate limit
     try:
         df = yf.download(tickers, period="1d", group_by="ticker")
+        # if df is an empty dataframe, return False
+        if df.empty:
+            return False
     except Exception as e:
         print(f"Error retrieving data for {tickers}: {str(e)}")
+        return False
 
     # unsack the dataframe to get the data in the right format
     if len(tickers) == 1:
@@ -137,11 +164,99 @@ def get_stock_prices(tickers):
         return data
 
 
-def get_stock_info(asset_code):
-    stock_info = yf.Ticker(asset_code)
-    return stock_info.info
+def add_stock(asset_code, stock_info):
+    name = stock_info.get("longName", None)
+    market_cap = stock_info.get("marketCap", None)
+    country = stock_info.get("country", None)
+    exchange = stock_info.get("exchange", None)
+    sector = stock_info.get("sector", None)
+    currency = stock_info.get("currency", None)
+    if currency:
+        currency = currency.upper()
+
+    if name is None or currency is None:
+        return False
+
+    with DbSession() as sesh:
+        add_stock_to_database = Stock(
+            name=name,
+            market_cap=market_cap,
+            country=country,
+            exchange=exchange,
+            sector=sector,
+            code=asset_code,
+            currency=currency,
+        )
+        sesh.add(add_stock_to_database)
+        sesh.commit()
+    return True
 
 
-def update_metadata(asset_code):
-    stock_info = yf.Ticker(asset_code)
-    stock_info.info
+def update_prices(stock_tickers, data):
+    try:
+        with DbSession() as sesh:
+            updated_counter = 0
+
+            if len(stock_tickers) > 1:
+                # Get the values from the dataframe
+                tickers = data["Ticker"]
+                close_prices = data["Close"]
+                dates = data.index
+
+                # Print the values
+                for ticker, close, date in zip(tickers, close_prices, dates):
+                    stock = sesh.query(Stock).filter_by(code=ticker).first()
+                    stock.price = close
+                    stock.price_date = date
+                    stock.last_updated = datetime.now()
+
+                    # calculate USD value of stock
+                    stock_currency = stock.currency
+                    # search currency table for currency code
+                    if stock_currency:
+                        stock.usd_price = calculate_usd_price(stock_currency, close)
+
+                    sesh.commit()
+
+                    updated_counter += 1
+            else:
+                ticker, close, date = data
+                stock = sesh.query(Stock).filter_by(code=ticker).first()
+                stock.price = close
+                stock.price_date = date
+                stock.last_updated = datetime.now()
+
+                # calculate USD value of stock
+                stock_currency = stock.currency
+                # search currency table for currency code
+                if stock_currency:
+                    stock.usd_price = calculate_usd_price(stock_currency, close)
+
+                sesh.commit()
+
+                updated_counter += 1
+
+            print(
+                "##### Database Update: ",
+                updated_counter,
+                "Stocks updated #####",
+            )
+
+    except Exception as e:
+        print(f"Error updating stocks table: {e}")
+        return False
+
+
+def calculate_usd_price(stock_currency, close):
+    with DbSession() as sesh:
+        # search currency table for currency code
+        currency = sesh.query(Currency).filter_by(code=stock_currency).first()
+    exchange_rate = currency.current_price
+    # calculate the USD value of the stock
+    usd_price = decimal.Decimal(close) / exchange_rate
+    return usd_price
+
+
+# def update_metadata(asset_code):
+#     stock_info = yf.Ticker(asset_code)
+#     stock_info.info

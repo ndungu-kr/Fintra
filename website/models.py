@@ -137,7 +137,7 @@ class Stock(db.Model):
     price = db.Column(db.DECIMAL)
     usd_price = db.Column(db.DECIMAL)
     exchange = db.Column(db.String(200))
-    market_cap = db.Column(db.DECIMAL, nullable=False, default=0)
+    market_cap = db.Column(db.DECIMAL)
     country = db.Column(db.String(200))
     currency = db.Column(db.String(200))
     sector = db.Column(db.String(200))

@@ -1,6 +1,11 @@
 from flask import render_template
 from flask_login import current_user, login_required
-from website.stock_import import get_stock_info, stock_import
+from website.stock_import import (
+    get_stock_info,
+    stock_import,
+    stock_validity_check,
+    yfinance_check,
+)
 from website.views import views
 from . import db
 import decimal
@@ -235,11 +240,10 @@ def submit_stock_buy():
     if len(asset_code) == 0:
         modal_errors.append("Please select a stock.")
     elif asset_code_exists is None:
-        # use yfinance to check if the stock exists
-        if yfinance_check(asset_code) is False:
-            modal_errors.append(
-                "Stock does not exist. Please select one from our selection."
-            )
+        # run stock validity check
+        stock_valid = stock_validity_check(asset_code)
+        if stock_valid is False:
+            modal_errors.append("Cannot receive stock info, please select another.")
 
     try:
         asset_amount = decimal.Decimal(request.form.get("assetAmount"))
@@ -309,42 +313,6 @@ def submit_stock_buy():
 
         flash("Stock successfully purchased.", category="success")
         return redirect(url_for("views.stock_wallet"))
-
-
-def yfinance_check(asset_code):
-    try:
-        stock_info = get_stock_info(asset_code)
-        name = stock_info["shortName"]
-        market_cap = stock_info["marketCap"]
-        country = stock_info["country"]
-        exchange = stock_info["exchange"]
-        sector = stock_info["sector"]
-        currency = stock_info["currency"]
-        save_to_database(
-            name, market_cap, country, exchange, sector, asset_code, currency
-        )
-        return True
-    except (ValueError, KeyError) as e:
-        print(
-            f"Failed to retrieve stock information for ticker symbol '{asset_code}': {e}"
-        )
-        return False
-
-
-def save_to_database(name, market_cap, country, exchange, sector, asset_code, currency):
-    add_stock_to_database = Stock(
-        name=name,
-        market_cap=market_cap,
-        country=country,
-        exchange=exchange,
-        sector=sector,
-        code=asset_code,
-        currency=currency,
-    )
-    db.session.add(add_stock_to_database)
-    db.session.commit()
-    # update stock table since new stock has been added to db
-    stock_import()
 
 
 @views.route("/submit-stock-sell-modal", methods=["POST"])
