@@ -180,3 +180,10 @@ class StockAmount(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class Exchange(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    suffix = db.Column(db.String(10), nullable=False)
+    country = db.Column(db.String(200), nullable=False)

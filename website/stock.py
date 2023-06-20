@@ -17,6 +17,7 @@ import yfinance as yf
 
 
 from website.models import (
+    Exchange,
     Stock,
     StockAmount,
     StockBuy,
@@ -51,7 +52,8 @@ def stock_wallet():
             asset_data = get_asset_data(asset.stock_code)
 
             # using USD price
-            asset_data.price = asset_data.usd_price
+            if asset_data.usd_price is not None:
+                asset_data.price = asset_data.usd_price
 
             # add asset price and name to the object
             asset.price = asset_data.price
@@ -233,34 +235,48 @@ def submit_stock_buy():
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
+    exchange = request.form.get("exchange")
     modal_errors = []
 
-    asset_code_exists = Stock.query.filter_by(code=asset_code).first()
+    exchange_exists = Exchange.query.filter_by(name=exchange).first()
 
+    # checking that a valid exchange was entered
+    if len(exchange) == 0:
+        modal_errors.append("Please select an exchange.")
+    elif exchange_exists is None:
+        modal_errors.append(
+            "Please select a valid exchange. Refer to the exchanges supported."
+        )
+
+    # adding suffix to stock code if it exists
+    if exchange_exists is not None:
+        suffix = exchange_exists.suffix
+        if suffix is not None:
+            asset_code = asset_code + suffix
+
+    # checking that a stock code was entered
     if len(asset_code) == 0:
         modal_errors.append("Please select a stock.")
-    elif asset_code_exists is None:
-        # run stock validity check
-        stock_valid = stock_validity_check(asset_code)
-        if stock_valid is False:
-            modal_errors.append("Cannot receive stock info, please select another.")
 
+    # checking that a asset amount was entered
     try:
         asset_amount = decimal.Decimal(request.form.get("assetAmount"))
     except decimal.InvalidOperation:
         modal_errors.append("Please enter a stock amount.")
 
+    # checking that a monetary amount was entered
     try:
         monetary_amount = float(request.form.get("monetaryAmount"))
     except ValueError:
         modal_errors.append("Please enter a monetary amount.")
 
+    # checking that a date was entered
     try:
         date = datetime.strptime(date_input, "%d/%m/%Y")
     except ValueError:
         modal_errors.append("Please enter a valid date.")
 
-    # checking that inputs were made
+    # confirming the inputs
     if len(modal_errors) > 0:
         for error in modal_errors:
             flash(error, category="modal_error")
@@ -269,12 +285,15 @@ def submit_stock_buy():
             url_for("views.stock_wallet", buy_modal_errors=buy_modal_errors)
         )
 
+    # checking that a valid asset amount was entered
     if asset_amount == 0 or asset_amount < 0 or asset_amount is None:
         modal_errors.append("Please enter a valid asset amount.")
 
+    # checking that a valid monetary amount was entered
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
 
+    # confirming that the inputs are valid
     if len(modal_errors) > 0:
         for error in modal_errors:
             flash(error, category="modal_error")
@@ -284,6 +303,23 @@ def submit_stock_buy():
         )
 
     else:
+        asset_code_exists = Stock.query.filter_by(code=asset_code).first()
+
+        # checking that the stock code is exists on yfinance
+        if asset_code_exists is None:
+            # run stock validity check
+            stock_valid = stock_validity_check(asset_code)
+            if stock_valid is False:
+                modal_errors.append("Cannot receive stock info, please select another.")
+            # confirming that the inputs are valid
+            if len(modal_errors) > 0:
+                for error in modal_errors:
+                    flash(error, category="modal_error")
+                buy_modal_errors = json.dumps(modal_errors)
+                return redirect(
+                    url_for("views.stock_wallet", buy_modal_errors=buy_modal_errors)
+                )
+
         # adding transaction to buy asset
         add_to_asset_buy = StockBuy(
             stock_code=asset_code,

@@ -8,7 +8,7 @@ from website.cryptocurrency_import import crypto_import
 from website.currency_import import initial_currency_import, currency_import
 from sqlalchemy.orm import sessionmaker
 
-from website.stock_import import stock_import
+from website.stock_import import import_yfinance_codes, stock_import
 
 
 def start_crypto_thread():
@@ -64,6 +64,9 @@ def start_currency_thread():
 
 
 def start_stock_thread():
+    # Getting the suffixes for the exchange markets
+    import_yfinance_codes()
+
     def generate_stock_data():
         asset = "stock"
         while True:
@@ -124,8 +127,8 @@ def determine_validity(asset, last_updated):
         # 1 hour for Currency data updates
         validity_period = 60
     elif asset == "stock":
-        # 1 minutes for Stock data updates
-        validity_period = 1
+        # 1 hour to check if new stock data avalaible
+        validity_period = 60
 
     if last_updated:
         expiry_time = last_updated + timedelta(minutes=validity_period)

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlite3 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -41,6 +41,48 @@ class DbSession:
         self.sesh.close()
 
 
+def import_yfinance_codes():
+    from website.models import Exchange
+    from os import getcwd, path
+    import os
+    import csv
+
+    # Acessing currency file and csv
+    stock_file = "stock_data"
+    stock_data = "yfinance_codes.csv"
+    cwd = path.abspath(getcwd())
+    stock_folder_path = path.join(cwd, "website", stock_file)
+
+    csv_file_path = os.path.join(stock_folder_path, stock_data)
+
+    try:
+        # Opening csv file to check all initial currencies are in the db
+        with open(csv_file_path, "r", newline="", encoding="utf-8-sig") as csvfile:
+            stock_reader = csv.DictReader(csvfile)
+            for row in stock_reader:
+                country = row["country"]
+                name = row["name"]
+                suffix = row["suffix"]
+
+                with DbSession() as sesh:
+                    suffix_exists = sesh.query(Exchange).filter_by(name=name).first()
+
+                    if suffix_exists:
+                        continue
+                    else:
+                        new_query = Exchange(
+                            name=name,
+                            suffix=suffix,
+                            country=country,
+                        )
+                        sesh.add(new_query)
+
+                    sesh.commit()
+
+    except Exception as e:
+        print(f"Error inserting data into exchange table: {e}")
+
+
 def stock_import():
     stock_tickers = []
 
@@ -51,11 +93,18 @@ def stock_import():
     if len(user_stocks) > 0:
         # Only update stocks that haven't been updated today
         for stock in user_stocks:
-            # if the stock has already been updated today, skip it
             today = datetime.now().date()
-            if stock.last_updated:
+            four_days_ago = today - timedelta(days=4)
+
+            # if there is a last updated and price date
+            if stock.last_updated and stock.price_date:
+                # and if the last updated is today
                 if stock.last_updated.date() == today:
-                    continue
+                    # and if the price date falls within the last 4 days
+                    if stock.price_date.date() >= four_days_ago:
+                        continue
+                    # if the price date is older than 4 days and last updated is today then try to update
+                    stock_tickers.append(f"{stock.code}")
             else:
                 # adding stock code in the list with quotes around it
                 stock_tickers.append(f"{stock.code}")
@@ -126,7 +175,7 @@ def yfinance_check(asset_code):
     stock_info = get_stock_info(asset_code)
 
     if stock_info is False:
-        return False
+        return False, False
 
     return True, stock_info
 
@@ -165,7 +214,7 @@ def get_stock_prices(tickers):
 
 
 def add_stock(asset_code, stock_info):
-    name = stock_info.get("longName", None)
+    name = stock_info.get("shortName", None)
     market_cap = stock_info.get("marketCap", None)
     country = stock_info.get("country", None)
     exchange = stock_info.get("exchange", None)
