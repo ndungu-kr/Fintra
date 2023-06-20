@@ -317,11 +317,11 @@
                     {% if user_transactions %}
                     {% for transaction in user_transactions %}
                     <tr>
-                        <td>{{ transaction.name }}</td>
+                        <td>{{ transaction.name }}({{ transaction.stock_code }})</td>
                         {% if transaction.type == "Buy" %}
-                        <td>{{ transaction.asset_amount }} (Buy)</td>
+                        <td>{{ transaction.stock_amount }} (Buy)</td>
                         {% else %}
-                        <td>{{ transaction.asset_amount }} (Sell)</td>
+                        <td>{{ transaction.stock_amount }} (Sell)</td>
                         {% endif %}
                         <td>{{ transaction.value }}</td>
                         <td>{{ transaction.short_date }}</td>
@@ -382,13 +382,13 @@
     }
 
     // Stock Distribution Chart
-    var assetNames = Object.keys(userAssetValues);
+    var assetCodes = Object.keys(userAssetValues);
     var assetValues = Object.values(userAssetValues);
     const ctz = document.getElementById('stockDistribution');
     new Chart(ctz, {
         type: 'doughnut',
         data: {
-            labels: assetNames,
+            labels: assetCodes,
             datasets: [{
                 label: 'Stock Distribution',
                 data: assetValues,

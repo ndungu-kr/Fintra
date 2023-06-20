@@ -58,6 +58,7 @@ def stock_wallet():
             # add asset price and name to the object
             asset.price = asset_data.price
             asset.name = asset_data.name
+            asset.code = asset_data.code
 
             if asset.price is None:
                 asset.price = 0
@@ -68,7 +69,7 @@ def stock_wallet():
 
             # adding names and values to the dict for the charts
             asset.formatted_value = f"{asset.full_value:.1f}"
-            user_asset_values[asset.name] = asset.formatted_value
+            user_asset_values[asset.code] = asset.formatted_value
 
             # adding the value of the asset to the total asset balance
             asset_balance += asset.full_value

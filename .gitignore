@@ -3,5 +3,5 @@
 crypto_data
 currency_data
 stock_data
-instance
+yfinance.cache
 ```      
