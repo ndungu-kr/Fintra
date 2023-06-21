@@ -81,7 +81,7 @@ def stock_wallet():
             asset.buy_instances = StockBuy.query.filter_by(
                 user_id=current_user.id, stock_code=asset.stock_code
             ).all()
-            asset.sell_instances = StockBuy.query.filter_by(
+            asset.sell_instances = StockSell.query.filter_by(
                 user_id=current_user.id, stock_code=asset.stock_code
             ).all()
 

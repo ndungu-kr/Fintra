@@ -103,6 +103,9 @@ def stock_import():
                     # and if the price date falls within the last 4 days
                     if stock.price_date.date() >= four_days_ago:
                         continue
+                    else:
+                        stock_tickers.append(f"{stock.code}")
+                else:
                     # if the price date is older than 4 days and last updated is today then try to update
                     stock_tickers.append(f"{stock.code}")
             else:
