@@ -11,13 +11,13 @@ from unicodedata import category
 
 from website.models import (
     Currency,
-    CurrencyAmount,
+    ForexAmount,
     ForexBuy,
     ForexSell,
 )
 
 holding = Currency
-holdingAmount = CurrencyAmount
+holdingAmount = ForexAmount
 holdingBuy = ForexBuy
 holdingSell = ForexSell
 
@@ -81,9 +81,9 @@ def modal_errors():
     return buy_modal_errors, sell_modal_errors
 
 
-def get_asset_data(cryptocurrency_code):
-    cryptocurrency_data = Currency.query.filter_by(code=cryptocurrency_code).first()
-    return cryptocurrency_data
+def get_asset_data(asset_code):
+    asset_data = holding.query.filter_by(code=asset_code).first()
+    return asset_data
 
 
 def calc_asset_totals():
@@ -93,7 +93,7 @@ def calc_asset_totals():
 
     if user_assets is not None:
         for asset in user_assets:
-            asset_data = get_asset_data(asset.currency_code)
+            asset_data = get_asset_data(asset.code)
 
             # add asset price and name to the object
             asset.price = asset_data.current_price
@@ -119,10 +119,10 @@ def calc_asset_totals():
 
             # getting all the buy and sell instances for the specific asset
             asset.buy_instances = holdingBuy.query.filter_by(
-                user_id=current_user.id, currency_code=asset.currency_code
+                user_id=current_user.id, code=asset.code
             ).all()
             asset.sell_instances = holdingSell.query.filter_by(
-                user_id=current_user.id, currency_code=asset.currency_code
+                user_id=current_user.id, code=asset.code
             ).all()
 
             # calculating the total amount spent on the asset
@@ -171,16 +171,16 @@ def calc_total_profits(asset_balance):
         total_asset_spend += buy_tranz.monetary_amount
         total_invested += buy_tranz.monetary_amount
         # if asset exists in dictionary, add to the quantity
-        if buy_tranz.currency_code in asset_quantities:
-            asset_quantities[buy_tranz.currency_code] += buy_tranz.currency_amount
+        if buy_tranz.code in asset_quantities:
+            asset_quantities[buy_tranz.code] += buy_tranz.quantity
         else:
-            asset_quantities[buy_tranz.currency_code] = buy_tranz.currency_amount
+            asset_quantities[buy_tranz.code] = buy_tranz.quantity
 
     # calculating value of asset sold
     for sell_tranz in user_sell_transactions:
         total_monetary_gained += sell_tranz.monetary_amount
         total_withdrawn += sell_tranz.monetary_amount
-        asset_quantities[sell_tranz.currency_code] -= sell_tranz.currency_amount
+        asset_quantities[sell_tranz.code] -= sell_tranz.quantity
 
     # calculating value of remaining assets
     for asset in asset_quantities:
@@ -256,9 +256,9 @@ def compiling_transactions_table():
     user_transactions.sort(key=lambda x: x.date, reverse=True)
     if user_transactions is not None:
         for transaction in user_transactions:
-            asset_data = get_asset_data(transaction.currency_code)
+            asset_data = get_asset_data(transaction.code)
             transaction.name = asset_data.name
-            transaction.currency_amount = round(transaction.currency_amount, 6)
+            transaction.quantity = round(transaction.quantity, 6)
             # formatting the value to 2 decimal places and adding commas to thousands
             transaction.value = float(transaction.monetary_amount)
             transaction.value = f"${transaction.value:,.2f}"
@@ -282,9 +282,9 @@ def submit_forex_buy():
 
     # adding transaction to buy asset
     add_to_asset_buy = holdingBuy(
-        currency_code=asset_code,
+        code=asset_code,
         user_id=current_user.id,
-        currency_amount=asset_amount,
+        quantity=asset_amount,
         monetary_amount=monetary_amount,
         description=description,
         date=date,
@@ -293,11 +293,11 @@ def submit_forex_buy():
 
     # updating the asset amounts table if the user already owns the asset
     user_owns_asset = holdingAmount.query.filter_by(
-        currency_code=asset_code, user_id=current_user.id
+        code=asset_code, user_id=current_user.id
     ).first()
     if user_owns_asset is None:
         add_to_asset_amounts = holdingAmount(
-            currency_code=asset_code,
+            code=asset_code,
             quantity=asset_amount,
             user_id=current_user.id,
         )
@@ -393,9 +393,9 @@ def submit_forex_sell():
 
     # adding transaction to sell asset sell
     add_to_asset_sell = holdingSell(
-        currency_code=asset_code,
+        code=asset_code,
         user_id=current_user.id,
-        currency_amount=asset_amount,
+        quantity=asset_amount,
         monetary_amount=monetary_amount,
         description=description,
         date=date,
@@ -404,7 +404,7 @@ def submit_forex_sell():
 
     # updating the asset amounts table
     user_asset_amount = holdingAmount.query.filter_by(
-        currency_code=asset_code, user_id=current_user.id
+        code=asset_code, user_id=current_user.id
     ).first()
     user_asset_amount.quantity -= asset_amount
 
@@ -455,7 +455,7 @@ def check_for_sell_inputs(modal_errors):
 
 def check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_amount):
     user_owns_asset = holdingAmount.query.filter_by(
-        currency_code=asset_code, user_id=current_user.id
+        code=asset_code, user_id=current_user.id
     ).first()
 
     if user_owns_asset is None:

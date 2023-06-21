@@ -19,84 +19,80 @@ class User(db.Model, UserMixin):
 
 class CryptocurrencyBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cryptocurrency_code = db.Column(
-        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
-    )
+    code = db.Column(db.String, db.ForeignKey("cryptocurrency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    crypto_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"CryptocurrencyBuy('{self.cryptocurrency_code}', '{self.crypto_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"CryptocurrencyBuy('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class CryptocurrencySell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cryptocurrency_code = db.Column(
-        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
-    )
+    code = db.Column(db.String, db.ForeignKey("cryptocurrency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    crypto_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"CryptocurrencySell('{self.cryptocurrency_code}', '{self.crypto_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"CryptocurrencySell('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class ForexBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    currency_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"ForexBuy('{self.currency_code}', '{self.currency_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"ForexBuy('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class ForexSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    currency_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"ForexSell('{self.currency_code}', '{self.currency_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"ForexSell('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class StockBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    stock_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"StockBuy('{self.stock_code}', '{self.stock_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"StockBuy('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class StockSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    stock_amount = db.Column(db.NUMERIC, nullable=False)
+    quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"StockSell('{self.stock_code}', '{self.stock_amount}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
+        return f"StockSell('{self.code}', '{self.quantity}', '{self.monetary_amount}', '{self.description}', '{self.date}')"
 
 
 class Cryptocurrency(db.Model):
@@ -126,7 +122,7 @@ class Currency(db.Model):
     forex_purchased = db.relationship("ForexBuy", backref="forex_purchased", lazy=True)
     forex_sold = db.relationship("ForexSell", backref="forex_sold", lazy=True)
     currency_asset_amounts = db.relationship(
-        "CurrencyAmount", backref="currency_asset_amounts", lazy=True
+        "ForexAmount", backref="currency_asset_amounts", lazy=True
     )
 
 
@@ -158,17 +154,15 @@ class AssetLastUpdated(db.Model):
 
 class CryptocurrencyAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cryptocurrency_code = db.Column(
-        db.String, db.ForeignKey("cryptocurrency.code"), nullable=False
-    )
+    code = db.Column(db.String, db.ForeignKey("cryptocurrency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
-class CurrencyAmount(db.Model):
+class ForexAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    currency_code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -176,7 +170,7 @@ class CurrencyAmount(db.Model):
 
 class StockAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("stock.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

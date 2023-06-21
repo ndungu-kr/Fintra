@@ -40,7 +40,7 @@ def cryptocurrency_wallet():
     user_crypto_values = {}
     if user_cryptos is not None:
         for crypto in user_cryptos:
-            cryptocurrency_data = get_cryptocurrency_data(crypto.cryptocurrency_code)
+            cryptocurrency_data = get_cryptocurrency_data(crypto.code)
 
             # add cryptocurrency price and name to the crypto object
             crypto.price = cryptocurrency_data.current_price
@@ -62,10 +62,10 @@ def cryptocurrency_wallet():
 
             # getting all the buy and sell instances for the specific cryptocurrency
             crypto.buy_instances = CryptocurrencyBuy.query.filter_by(
-                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+                user_id=current_user.id, code=crypto.code
             ).all()
             crypto.sell_instances = CryptocurrencySell.query.filter_by(
-                user_id=current_user.id, cryptocurrency_code=crypto.cryptocurrency_code
+                user_id=current_user.id, code=crypto.code
             ).all()
 
             # calculating the total amount spent on the cryptocurrency
@@ -114,15 +114,15 @@ def cryptocurrency_wallet():
         total_crypto_spend += buy_tranz.monetary_amount
         total_invested += buy_tranz.monetary_amount
         # if asset exists in dictionary, add to the quantity
-        if buy_tranz.cryptocurrency_code in asset_quantities:
-            asset_quantities[buy_tranz.cryptocurrency_code] += buy_tranz.crypto_amount
+        if buy_tranz.code in asset_quantities:
+            asset_quantities[buy_tranz.code] += buy_tranz.quantity
         else:
-            asset_quantities[buy_tranz.cryptocurrency_code] = buy_tranz.crypto_amount
+            asset_quantities[buy_tranz.code] = buy_tranz.quantity
     # calculating value of asset sold
     for sell_tranz in user_sell_transactions:
         total_monetary_gained += sell_tranz.monetary_amount
         total_withdrawn += sell_tranz.monetary_amount
-        asset_quantities[sell_tranz.cryptocurrency_code] -= sell_tranz.crypto_amount
+        asset_quantities[sell_tranz.code] -= sell_tranz.quantity
     # calculating value of remaining assets
     for asset in asset_quantities:
         crypto_data = get_cryptocurrency_data(asset)
@@ -190,11 +190,9 @@ def cryptocurrency_wallet():
     user_transactions.sort(key=lambda x: x.date, reverse=True)
     if user_transactions is not None:
         for transaction in user_transactions:
-            cryptocurrency_data = get_cryptocurrency_data(
-                transaction.cryptocurrency_code
-            )
+            cryptocurrency_data = get_cryptocurrency_data(transaction.code)
             transaction.name = cryptocurrency_data.name
-            transaction.crypto_amount = round(transaction.crypto_amount, 6)
+            transaction.quantity = round(transaction.quantity, 6)
             # formatting the value to 2 decimal places and adding commas to thousands
             transaction.value = float(transaction.monetary_amount)
             transaction.value = f"${transaction.value:,.2f}"
@@ -219,25 +217,21 @@ def cryptocurrency_wallet():
     )
 
 
-def get_cryptocurrency_data(cryptocurrency_code):
-    cryptocurrency_data = Cryptocurrency.query.filter_by(
-        code=cryptocurrency_code
-    ).first()
+def get_cryptocurrency_data(code):
+    cryptocurrency_data = Cryptocurrency.query.filter_by(code=code).first()
     return cryptocurrency_data
 
 
 @views.route("/submit-crypto-buy-modal", methods=["POST"])
 def submit_crypto_buy():
-    cryptocurrency_code = request.form.get("cryptocurrency")
+    code = request.form.get("cryptocurrency")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
     modal_errors = []
 
-    cryptocurrency_code_exists = Cryptocurrency.query.filter_by(
-        code=cryptocurrency_code
-    ).first()
+    cryptocurrency_code_exists = Cryptocurrency.query.filter_by(code=code).first()
 
-    if len(cryptocurrency_code) == 0:
+    if len(code) == 0:
         modal_errors.append("Please select a cryptocurrency.")
     elif cryptocurrency_code_exists is None:
         modal_errors.append(
@@ -291,9 +285,9 @@ def submit_crypto_buy():
     else:
         # adding transaction to buy cryptocurrency
         add_to_crypto_buy = CryptocurrencyBuy(
-            cryptocurrency_code=cryptocurrency_code,
+            code=code,
             user_id=current_user.id,
-            crypto_amount=cryptocurrency_amount,
+            quantity=cryptocurrency_amount,
             monetary_amount=monetary_amount,
             description=description,
             date=date,
@@ -302,11 +296,11 @@ def submit_crypto_buy():
 
         # updating the cryptocurrency amounts table if the user already owns the cryptocurrency
         user_owns_asset = CryptocurrencyAmount.query.filter_by(
-            cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+            code=code, user_id=current_user.id
         ).first()
         if user_owns_asset is None:
             add_to_crypto_amounts = CryptocurrencyAmount(
-                cryptocurrency_code=cryptocurrency_code,
+                code=code,
                 quantity=cryptocurrency_amount,
                 user_id=current_user.id,
             )
@@ -321,16 +315,16 @@ def submit_crypto_buy():
 
 @views.route("/submit-crypto-sell-modal", methods=["POST"])
 def submit_crypto_sell():
-    cryptocurrency_code = request.form.get("cryptocurrency")
+    code = request.form.get("cryptocurrency")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
     modal_errors = []
 
     user_owns_crypto = CryptocurrencyAmount.query.filter_by(
-        cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+        code=code, user_id=current_user.id
     ).first()
 
-    if len(cryptocurrency_code) == 0:
+    if len(code) == 0:
         modal_errors.append("Please select a cryptocurrency.")
     elif user_owns_crypto is None:
         modal_errors.append("You do not own this cryptocurrency.")
@@ -382,9 +376,9 @@ def submit_crypto_sell():
     else:
         # adding transaction to sell cryptocurrency
         add_to_crypto_sell = CryptocurrencySell(
-            cryptocurrency_code=cryptocurrency_code,
+            code=code,
             user_id=current_user.id,
-            crypto_amount=cryptocurrency_amount,
+            quantity=cryptocurrency_amount,
             monetary_amount=monetary_amount,
             description=description,
             date=date,
@@ -393,7 +387,7 @@ def submit_crypto_sell():
 
         # updating the cryptocurrency amounts table
         user_crypto_amount = CryptocurrencyAmount.query.filter_by(
-            cryptocurrency_code=cryptocurrency_code, user_id=current_user.id
+            code=code, user_id=current_user.id
         ).first()
         user_crypto_amount.quantity -= cryptocurrency_amount
 

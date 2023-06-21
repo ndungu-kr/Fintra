@@ -317,11 +317,11 @@
                     {% if user_transactions %}
                     {% for transaction in user_transactions %}
                     <tr>
-                        <td>{{ transaction.name }} ({{ transaction.stock_code }})</td>
+                        <td>{{ transaction.name }} ({{ transaction.code }})</td>
                         {% if transaction.type == "Buy" %}
-                        <td>{{ transaction.stock_amount }} (Buy)</td>
+                        <td>{{ transaction.quantity }} (Buy)</td>
                         {% else %}
-                        <td>{{ transaction.stock_amount }} (Sell)</td>
+                        <td>{{ transaction.quantity }} (Sell)</td>
                         {% endif %}
                         <td>{{ transaction.value }}</td>
                         <td>{{ transaction.short_date }}</td>
