@@ -312,9 +312,9 @@
                     <tr>
                         <td>{{ transaction.name }}</td>
                         {% if transaction.type == "Buy" %}
-                        <td>{{ transaction.crypto_amount }} (Buy)</td>
+                        <td>{{ transaction.quantity }} (Buy)</td>
                         {% else %}
-                        <td>{{ transaction.crypto_amount }} (Sell)</td>
+                        <td>{{ transaction.quantity }} (Sell)</td>
                         {% endif %}
                         <td>{{ transaction.value }}</td>
                         <td>{{ transaction.short_date }}</td>

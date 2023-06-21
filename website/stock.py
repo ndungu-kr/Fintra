@@ -49,7 +49,7 @@ def stock_wallet():
 
     if user_assets is not None:
         for asset in user_assets:
-            asset_data = get_asset_data(asset.stock_code)
+            asset_data = get_asset_data(asset.code)
 
             # using USD price
             if asset_data.usd_price is not None:
@@ -79,10 +79,10 @@ def stock_wallet():
 
             # getting all the buy and sell instances for the specific asset
             asset.buy_instances = StockBuy.query.filter_by(
-                user_id=current_user.id, stock_code=asset.stock_code
+                user_id=current_user.id, code=asset.code
             ).all()
             asset.sell_instances = StockSell.query.filter_by(
-                user_id=current_user.id, stock_code=asset.stock_code
+                user_id=current_user.id, code=asset.code
             ).all()
 
             # calculating the total amount spent on the asset
@@ -128,16 +128,16 @@ def stock_wallet():
         total_asset_spend += buy_tranz.monetary_amount
         total_invested += buy_tranz.monetary_amount
         # if asset exists in dictionary, add to the quantity
-        if buy_tranz.stock_code in asset_quantities:
-            asset_quantities[buy_tranz.stock_code] += buy_tranz.stock_amount
+        if buy_tranz.code in asset_quantities:
+            asset_quantities[buy_tranz.code] += buy_tranz.quantity
         else:
-            asset_quantities[buy_tranz.stock_code] = buy_tranz.stock_amount
+            asset_quantities[buy_tranz.code] = buy_tranz.quantity
 
     # calculating value of asset sold
     for sell_tranz in user_sell_transactions:
         total_monetary_gained += sell_tranz.monetary_amount
         total_withdrawn += sell_tranz.monetary_amount
-        asset_quantities[sell_tranz.stock_code] -= sell_tranz.stock_amount
+        asset_quantities[sell_tranz.code] -= sell_tranz.quantity
 
     # calculating value of remaining assets
     for asset in asset_quantities:
@@ -199,9 +199,9 @@ def stock_wallet():
     user_transactions.sort(key=lambda x: x.date, reverse=True)
     if user_transactions is not None:
         for transaction in user_transactions:
-            asset_data = get_asset_data(transaction.stock_code)
+            asset_data = get_asset_data(transaction.code)
             transaction.name = asset_data.name
-            transaction.stock_amount = round(transaction.stock_amount, 6)
+            transaction.quantity = round(transaction.quantity, 6)
             # formatting the value to 2 decimal places and adding commas to thousands
             transaction.value = float(transaction.monetary_amount)
             transaction.value = f"${transaction.value:,.2f}"
@@ -226,8 +226,8 @@ def stock_wallet():
     )
 
 
-def get_asset_data(stock_code):
-    asset_data = Stock.query.filter_by(code=stock_code).first()
+def get_asset_data(code):
+    asset_data = Stock.query.filter_by(code=code).first()
     return asset_data
 
 
@@ -323,9 +323,9 @@ def submit_stock_buy():
 
         # adding transaction to buy asset
         add_to_asset_buy = StockBuy(
-            stock_code=asset_code,
+            code=asset_code,
             user_id=current_user.id,
-            stock_amount=asset_amount,
+            quantity=asset_amount,
             monetary_amount=monetary_amount,
             description=description,
             date=date,
@@ -334,11 +334,11 @@ def submit_stock_buy():
 
         # updating the asset amounts table if the user already owns the asset
         user_owns_asset = StockAmount.query.filter_by(
-            stock_code=asset_code, user_id=current_user.id
+            code=asset_code, user_id=current_user.id
         ).first()
         if user_owns_asset is None:
             add_to_asset_amounts = StockAmount(
-                stock_code=asset_code,
+                code=asset_code,
                 quantity=asset_amount,
                 user_id=current_user.id,
             )
@@ -360,7 +360,7 @@ def submit_stock_sell():
     modal_errors = []
 
     user_owns_asset = StockAmount.query.filter_by(
-        stock_code=asset_code, user_id=current_user.id
+        code=asset_code, user_id=current_user.id
     ).first()
 
     if len(asset_code) == 0:
@@ -409,9 +409,9 @@ def submit_stock_sell():
     else:
         # adding transaction to sell asset sell
         add_to_asset_sell = StockSell(
-            stock_code=asset_code,
+            code=asset_code,
             user_id=current_user.id,
-            stock_amount=asset_amount,
+            quantity=asset_amount,
             monetary_amount=monetary_amount,
             description=description,
             date=date,
@@ -420,7 +420,7 @@ def submit_stock_sell():
 
         # updating the asset amounts table
         user_asset_amount = StockAmount.query.filter_by(
-            stock_code=asset_code, user_id=current_user.id
+            code=asset_code, user_id=current_user.id
         ).first()
         user_asset_amount.quantity -= asset_amount
 
