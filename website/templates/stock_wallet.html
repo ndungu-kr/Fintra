@@ -279,7 +279,7 @@
                     {% if user_assets %}
                     {% for asset in user_assets %}
                     <tr>
-                        <td>{{ asset.name }}({{ asset.code }})</td>
+                        <td>{{ asset.name }} ({{ asset.code }})</td>
                         <td>{{ asset.quantity }}</td>
                         <td>{{ asset.value }}</td>
                         <td>{{ asset.profit }}</td>
@@ -317,7 +317,7 @@
                     {% if user_transactions %}
                     {% for transaction in user_transactions %}
                     <tr>
-                        <td>{{ transaction.name }}({{ transaction.stock_code }})</td>
+                        <td>{{ transaction.name }} ({{ transaction.stock_code }})</td>
                         {% if transaction.type == "Buy" %}
                         <td>{{ transaction.stock_amount }} (Buy)</td>
                         {% else %}
