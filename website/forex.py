@@ -81,8 +81,8 @@ def modal_errors():
     return buy_modal_errors, sell_modal_errors
 
 
-def get_asset_data(cryptocurrency_code):
-    cryptocurrency_data = Currency.query.filter_by(code=cryptocurrency_code).first()
+def get_asset_data(forex_code):
+    cryptocurrency_data = Currency.query.filter_by(code=forex_code).first()
     return cryptocurrency_data
 
 
