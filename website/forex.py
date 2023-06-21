@@ -10,13 +10,13 @@ from unicodedata import category
 
 
 from website.models import (
-    Currency,
+    Forex,
     ForexAmount,
     ForexBuy,
     ForexSell,
 )
 
-holding = Currency
+holding = Forex
 holdingAmount = ForexAmount
 holdingBuy = ForexBuy
 holdingSell = ForexSell

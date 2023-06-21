@@ -45,7 +45,7 @@ class CryptocurrencySell(db.Model):
 
 class ForexBuy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("forex.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
@@ -58,7 +58,7 @@ class ForexBuy(db.Model):
 
 class ForexSell(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("forex.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     monetary_amount = db.Column(db.DECIMAL, nullable=False)
@@ -112,7 +112,7 @@ class Cryptocurrency(db.Model):
     )
 
 
-class Currency(db.Model):
+class Forex(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
     name = db.Column(db.String(200), nullable=False)
@@ -162,7 +162,7 @@ class CryptocurrencyAmount(db.Model):
 
 class ForexAmount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, db.ForeignKey("currency.code"), nullable=False)
+    code = db.Column(db.String, db.ForeignKey("forex.code"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     quantity = db.Column(db.NUMERIC, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

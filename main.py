@@ -45,5 +45,5 @@ if __name__ == "__main__":
     # with app.app_context():
     #     # Start the crypto generation loop on a 2nd thread
     #     start_crypto_thread()
-    # Start the currency generation loop on a 3rd thread
+    # Start the forex generation loop on a 3rd thread
     # start_currency_thread()
