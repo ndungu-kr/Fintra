@@ -272,7 +272,7 @@
                     {% if user_cryptos %}
                     {% for crypto in user_cryptos %}
                     <tr>
-                        <td>{{ crypto.name }}</td>
+                        <td>{{ crypto.name }} ({{ crypto.code }})</td>
                         <td>{{ crypto.quantity }}</td>
                         <td>{{ crypto.value }}</td>
                         <td>{{ crypto.profit }}</td>
@@ -310,7 +310,7 @@
                     {% if user_transactions %}
                     {% for transaction in user_transactions %}
                     <tr>
-                        <td>{{ transaction.name }}</td>
+                        <td>{{ transaction.name }} ({{ transaction.code }})</td>
                         {% if transaction.type == "Buy" %}
                         <td>{{ transaction.quantity }} (Buy)</td>
                         {% else %}
