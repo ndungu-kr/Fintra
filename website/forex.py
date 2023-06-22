@@ -10,13 +10,13 @@ from unicodedata import category
 
 
 from website.models import (
-    Currency,
+    Forex,
     ForexAmount,
     ForexBuy,
     ForexSell,
 )
 
-holding = Currency
+holding = Forex
 holdingAmount = ForexAmount
 holdingBuy = ForexBuy
 holdingSell = ForexSell
@@ -96,7 +96,7 @@ def calc_asset_totals():
             asset_data = get_asset_data(asset.code)
 
             # add asset price and name to the object
-            asset.price = asset_data.current_price
+            asset.price = 1 / asset_data.current_price
             asset.name = asset_data.name
             asset.code = asset_data.code
 

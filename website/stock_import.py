@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from sqlite3 import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from website.models import Currency, Stock
+from website.models import Forex, Stock
 import yfinance as yf
 from requests import Session
 from requests_cache import CacheMixin, SQLiteCache
@@ -47,7 +47,7 @@ def import_yfinance_codes():
     import os
     import csv
 
-    # Acessing currency file and csv
+    # Acessing stock file and csv
     stock_file = "stock_data"
     stock_data = "yfinance_codes.csv"
     cwd = path.abspath(getcwd())
@@ -264,7 +264,7 @@ def update_prices(stock_tickers, data):
 
                     # calculate USD value of stock
                     stock_currency = stock.currency
-                    # search currency table for currency code
+                    # search forex table for currency code
                     if stock_currency:
                         stock.usd_price = calculate_usd_price(stock_currency, close)
 
@@ -280,7 +280,7 @@ def update_prices(stock_tickers, data):
 
                 # calculate USD value of stock
                 stock_currency = stock.currency
-                # search currency table for currency code
+                # search forex table for currency code
                 if stock_currency:
                     stock.usd_price = calculate_usd_price(stock_currency, close)
 
@@ -301,8 +301,8 @@ def update_prices(stock_tickers, data):
 
 def calculate_usd_price(stock_currency, close):
     with DbSession() as sesh:
-        # search currency table for currency code
-        currency = sesh.query(Currency).filter_by(code=stock_currency).first()
+        # search forex table for currency code
+        currency = sesh.query(Forex).filter_by(code=stock_currency).first()
     exchange_rate = currency.current_price
     # calculate the USD value of the stock
     usd_price = decimal.Decimal(close) / exchange_rate

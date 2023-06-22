@@ -357,7 +357,24 @@ def submit_stock_sell():
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
+    exchange = request.form.get("exchange")
     modal_errors = []
+
+    exchange_exists = Exchange.query.filter_by(name=exchange).first()
+
+    # checking that a valid exchange was entered
+    if len(exchange) == 0:
+        modal_errors.append("Please select an exchange.")
+    elif exchange_exists is None:
+        modal_errors.append(
+            "Please select a valid exchange. Refer to the exchanges supported."
+        )
+
+    # adding suffix to stock code if it exists
+    if exchange_exists is not None:
+        suffix = exchange_exists.suffix
+        if suffix is not None:
+            asset_code = asset_code + suffix
 
     user_owns_asset = StockAmount.query.filter_by(
         code=asset_code, user_id=current_user.id
@@ -365,7 +382,8 @@ def submit_stock_sell():
 
     if len(asset_code) == 0:
         modal_errors.append("Please select a stock.")
-    elif user_owns_asset is None:
+
+    if user_owns_asset is None:
         modal_errors.append("You do not own this stock.")
 
     try:

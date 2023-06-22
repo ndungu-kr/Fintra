@@ -36,16 +36,16 @@ def start_crypto_thread():
 
 
 def start_currency_thread():
-    # Run the initial currency import to add relevant currencies to DB
+    # Run the initial forex import to add relevant currencies to DB
     initial_currency_import()
 
-    # Schedule the currency check to run every 1 minute
+    # Schedule the forex check to run every 1 minute
     def generate_currency_data():
-        asset = "currency"
+        asset = "forex"
         while True:
             try:
                 last_updated = check_latest_update(asset)
-                print(f"Last updated time for Currency: {last_updated}")
+                print(f"Last updated time for Forex: {last_updated}")
             except Exception as e:
                 print(f"Error checking last updated time: {e}")
 
@@ -57,7 +57,7 @@ def start_currency_thread():
             # Should Wait 15 minutes before checking again (900)
             time.sleep(60)
 
-    # Start the currency generation loop on a 2nd thread
+    # Start the forex generation loop on a 2nd thread
     currency_thread = threading.Thread(target=generate_currency_data)
     currency_thread.daemon = True
     currency_thread.start()
@@ -123,8 +123,8 @@ def determine_validity(asset, last_updated):
     if asset == "cryptocurrency":
         # 30 minutes for Crypto data updates
         validity_period = 30
-    elif asset == "currency":
-        # 1 hour for Currency data updates
+    elif asset == "forex":
+        # 1 hour for Forex data updates
         validity_period = 60
     elif asset == "stock":
         # 1 hour to check if new stock data avalaible

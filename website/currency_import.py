@@ -10,9 +10,9 @@ from forex_python.converter import CurrencyCodes
 
 
 def initial_currency_import():
-    from website.models import Currency
+    from website.models import Forex
 
-    # Acessing currency file and csv
+    # Acessing forex file and csv
     currency_file = "currency_data"
     currency_data = "currencies.csv"
     cwd = path.abspath(getcwd())
@@ -38,11 +38,9 @@ def initial_currency_import():
                 name = row["name"]
                 symbol = row["symbol"]
 
-                currency_code_exists = (
-                    session.query(Currency).filter_by(code=code).first()
-                )
+                currency_code_exists = session.query(Forex).filter_by(code=code).first()
 
-                # if currency code exists then skip
+                # if forex code exists then skip
                 if currency_code_exists:
                     pass
                 # otherwise add it to the db
@@ -51,7 +49,7 @@ def initial_currency_import():
                     last_updated = datetime.now().replace(microsecond=0).isoformat()
                     date_format = "%Y-%m-%dT%H:%M:%S"
                     last_updated = datetime.strptime(last_updated, date_format)
-                    new_query = Currency(
+                    new_query = Forex(
                         code=code,
                         name=name,
                         current_price=None,
@@ -69,13 +67,13 @@ def initial_currency_import():
             )
 
     except Exception as e:
-        print(f"Error inserting data into currency table: {e}")
+        print(f"Error inserting data into forex table: {e}")
 
 
 def get_currency_pairs():
-    from website.models import Currency
+    from website.models import Forex
 
-    # Read db for codes in currency table
+    # Read db for codes in forex table
     try:
         engine = create_engine("sqlite:///./instance/database.db")
         Session = sessionmaker(bind=engine)
@@ -84,12 +82,12 @@ def get_currency_pairs():
         print(f"Error connecting to the database: {e}")
 
     try:
-        currency_codes = session.query(Currency.code).all()
+        currency_codes = session.query(Forex.code).all()
         currency_pairs = []
     except Exception as e:
-        print(f"Error reading currency table: {e}")
+        print(f"Error reading forex table: {e}")
 
-    # Create currency pairs for API request
+    # Create forex pairs for API request
     for code in currency_codes:
         currency_pairs.append(f"USD/{code[0]}")
 
@@ -114,7 +112,7 @@ def currency_import():
     timestamp = data["timestamp"]
     rates = data["rates"]
 
-    # Fetch the currency names using the CurrencyCodes library
+    # Fetch the forex asset names using the CurrencyCodes library
     currency_codes = list(rates.keys())
     c = CurrencyCodes()
     currency_names = [c.get_currency_name(code) for code in currency_codes]
@@ -122,7 +120,7 @@ def currency_import():
     # Prepare the data
     currency_data = [["code", "name", "current_price", "last_updated"]]
 
-    from website.models import Currency
+    from website.models import Forex
 
     engine = create_engine("sqlite:///./instance/database.db")
     Session = sessionmaker(bind=engine)
@@ -136,10 +134,10 @@ def currency_import():
         csv_row = [code, name, current_price, last_updated]
         currency_data.append(csv_row)
 
-        # Check if currency code exists in db
+        # Check if forex code exists in db
 
         with Session() as session:
-            currency_code_exists = session.query(Currency).filter_by(code=code).first()
+            currency_code_exists = session.query(Forex).filter_by(code=code).first()
             # change timestamp to datetime object
             last_updated = datetime.strptime(last_updated, "%Y-%m-%dT%H:%M:%S")
             if name is None:
@@ -151,8 +149,8 @@ def currency_import():
                 currency_code_exists.last_updated = last_updated
                 session.commit()
             else:
-                # Add new currency to db
-                new_query = Currency(
+                # Add new forex asset to db
+                new_query = Forex(
                     code=code,
                     name=name,
                     current_price=current_price,
@@ -164,7 +162,7 @@ def currency_import():
     # Update AssetLastUpdated table
     from website.loops import update_last_updated
 
-    asset = "currency"
+    asset = "forex"
     update_last_updated(asset)
 
     save_to_csv(currency_data)
@@ -180,7 +178,7 @@ def save_to_csv(currency_data):
     # Removing milliseconds from time for naming csv
     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
 
-    filename = f"currency prices {formatted_time}.csv"
+    filename = f"forex asset prices {formatted_time}.csv"
     file_path = os.path.join(prices_folder_path, filename)
 
     # Write data to CSV file
@@ -188,7 +186,7 @@ def save_to_csv(currency_data):
         writer = csv.writer(file)
         writer.writerows(currency_data)
 
-    print(f"Currency prices, names, and timestamps saved to {filename}.")
+    print(f"Forex prices, names, and timestamps saved to {filename}.")
 
 
 def check_for_csv(current_time, prices_folder_path):
@@ -197,7 +195,7 @@ def check_for_csv(current_time, prices_folder_path):
 
     # Removing string from filenames to make datetime objs
     prices_file_times_unedited = [
-        s.strip("currency prices ") for s in currency_file_list
+        s.strip("forex asset prices ") for s in currency_file_list
     ]
     prices_file_times_in_string = [s.strip(".csv") for s in prices_file_times_unedited]
     prices_file_times = [
