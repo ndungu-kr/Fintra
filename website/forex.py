@@ -96,7 +96,9 @@ def calc_asset_totals():
             asset_data = get_asset_data(asset.code)
 
             # add asset price and name to the object
-            asset.price = 1 / asset_data.current_price
+            asset.price = (
+                1 / asset_data.current_price
+            )  # for forex the price is respective to 1 USD
             asset.name = asset_data.name
             asset.code = asset_data.code
 
@@ -187,7 +189,9 @@ def calc_total_profits(asset_balance):
         asset_data = get_asset_data(asset)
         if asset_data.current_price is None:
             asset_data.current_price = 0
-        value_of_remaining_assets += asset_quantities[asset] * asset_data.current_price
+        value_of_remaining_assets += asset_quantities[asset] * (
+            1 / asset_data.current_price
+        )  # for forex the price is respective to 1 USD
 
     # calculating total profit
     total_asset_profit = (
