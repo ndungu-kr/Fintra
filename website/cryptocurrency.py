@@ -21,6 +21,45 @@ from website.models import (
 @login_required
 def cryptocurrency_wallet():
     ############### modal errors ###############
+    buy_modal_errors, sell_modal_errors = modal_errors()
+
+    ############### Getting cryptocurrency asset totals for the user ###############
+    user_assets, user_asset_values, asset_balance = calc_asset_totals()
+
+    ############### Calculating total asset profit ###############
+    (
+        total_asset_balance,
+        total_asset_profit,
+        total_asset_profit_percentage,
+        total_invested,
+        total_withdrawn,
+    ) = calc_total_profits(asset_balance)
+
+    ############### Getting the users monthly breakdown ###############
+    total_invested_this_month, total_sold_this_month = calc_monthly_breakdown()
+
+    ############### Compiling transactions for transactions table ###############
+    user_transactions = compiling_transactions_table()
+
+    return render_template(
+        "cryptocurrency_wallet.html",
+        user=current_user,
+        total_asset_balance=total_asset_balance,
+        total_asset_profit=total_asset_profit,
+        total_asset_profit_percentage=total_asset_profit_percentage,
+        total_invested=total_invested,
+        total_withdrawn=total_withdrawn,
+        total_invested_this_month=total_invested_this_month,
+        total_sold_this_month=total_sold_this_month,
+        user_assets=user_assets,
+        user_transactions=user_transactions,
+        buy_modal_errors=buy_modal_errors,
+        sell_modal_errors=sell_modal_errors,
+        user_asset_values=user_asset_values,
+    )
+
+
+def modal_errors():
     buy_modal_errors = request.args.get("buy_modal_errors")
     sell_modal_errors = request.args.get("sell_modal_errors")
 
@@ -34,12 +73,20 @@ def cryptocurrency_wallet():
     else:
         sell_modal_errors = {}
 
-    ############### Getting cryptocurrency asset totals for the user ###############
-    user_cryptos = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
-    crypto_balance = 0
-    user_crypto_values = {}
-    if user_cryptos is not None:
-        for crypto in user_cryptos:
+    return buy_modal_errors, sell_modal_errors
+
+
+def get_cryptocurrency_data(code):
+    cryptocurrency_data = Cryptocurrency.query.filter_by(code=code).first()
+    return cryptocurrency_data
+
+
+def calc_asset_totals():
+    user_assets = CryptocurrencyAmount.query.filter_by(user_id=current_user.id).all()
+    asset_balance = 0
+    user_asset_values = {}
+    if user_assets is not None:
+        for crypto in user_assets:
             cryptocurrency_data = get_cryptocurrency_data(crypto.code)
 
             # add cryptocurrency price and name to the crypto object
@@ -52,10 +99,10 @@ def cryptocurrency_wallet():
 
             # adding names and values to the dict for the charts
             crypto.formatted_value = f"{crypto.full_value:.1f}"
-            user_crypto_values[crypto.name] = crypto.formatted_value
+            user_asset_values[crypto.name] = crypto.formatted_value
 
             # adding the value of the cryptocurrency to the total crypto balance
-            crypto_balance += crypto.full_value
+            asset_balance += crypto.full_value
 
             # formatting the value to 2 decimal places and adding commas to thousands
             crypto.value = f"${crypto.full_value:,.2f}"
@@ -96,7 +143,10 @@ def cryptocurrency_wallet():
                 crypto.profit = f"-${crypto.profit[1:]}"
             crypto.profit_percentage = f"{crypto.profit_percentage:,.2f}%"
 
-    ############### Calculating total asset profit ###############
+    return user_assets, user_asset_values, asset_balance
+
+
+def calc_total_profits(asset_balance):
     total_invested = 0
     total_withdrawn = 0
     user_buy_transactions = CryptocurrencyBuy.query.filter_by(
@@ -128,29 +178,36 @@ def cryptocurrency_wallet():
         crypto_data = get_cryptocurrency_data(asset)
         value_of_remaining_assets += asset_quantities[asset] * crypto_data.current_price
     # calculating total profit
-    total_crypto_profit = (
+    total_asset_profit = (
         total_monetary_gained + value_of_remaining_assets - total_crypto_spend
     )
     if total_crypto_spend != 0:
-        total_crypto_profit_percentage = (
-            total_crypto_profit / total_crypto_spend
-        ) * 100
-        total_crypto_profit_percentage = f"{total_crypto_profit_percentage:,.2f}%"
-        if total_crypto_profit >= 0:
-            total_crypto_profit = f"${total_crypto_profit:,.2f}"
-        elif total_crypto_profit < 0:
-            total_crypto_profit = total_crypto_profit * -1
-            total_crypto_profit = f"-${total_crypto_profit:,.2f}"
+        total_asset_profit_percentage = (total_asset_profit / total_crypto_spend) * 100
+        total_asset_profit_percentage = f"{total_asset_profit_percentage:,.2f}%"
+        if total_asset_profit >= 0:
+            total_asset_profit = f"${total_asset_profit:,.2f}"
+        elif total_asset_profit < 0:
+            total_asset_profit = total_asset_profit * -1
+            total_asset_profit = f"-${total_asset_profit:,.2f}"
     else:
-        total_crypto_profit_percentage = "0.00%"
-        total_crypto_profit = "$0.00"
+        total_asset_profit_percentage = "0.00%"
+        total_asset_profit = "$0.00"
 
     # formatting to 2 decimal places and adding commas to thousands
-    total_crypto_balance = f"${crypto_balance:,.2f}"
+    total_asset_balance = f"${asset_balance:,.2f}"
     total_invested = f"${total_invested:,.2f}"
     total_withdrawn = f"${total_withdrawn:,.2f}"
 
-    ############### Getting the users monthly breakdown ###############
+    return (
+        total_asset_balance,
+        total_asset_profit,
+        total_asset_profit_percentage,
+        total_invested,
+        total_withdrawn,
+    )
+
+
+def calc_monthly_breakdown():
     user_buy_transactions2 = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()
@@ -173,7 +230,10 @@ def cryptocurrency_wallet():
     total_invested_this_month = f"${total_invested_this_month:,.2f}"
     total_sold_this_month = f"${total_sold_this_month:,.2f}"
 
-    ############### Compiling transactions for transactions table ###############
+    return total_invested_this_month, total_sold_this_month
+
+
+def compiling_transactions_table():
     user_buy_transactions3 = CryptocurrencyBuy.query.filter_by(
         user_id=current_user.id
     ).all()
@@ -199,27 +259,7 @@ def cryptocurrency_wallet():
             # changing the date to a string in the format "Day/Month/Year"
             transaction.short_date = transaction.date.strftime("%d/%m/%Y")
 
-    return render_template(
-        "cryptocurrency_wallet.html",
-        user=current_user,
-        total_crypto_balance=total_crypto_balance,
-        total_crypto_profit=total_crypto_profit,
-        total_crypto_profit_percentage=total_crypto_profit_percentage,
-        total_invested=total_invested,
-        total_withdrawn=total_withdrawn,
-        total_invested_this_month=total_invested_this_month,
-        total_sold_this_month=total_sold_this_month,
-        user_cryptos=user_cryptos,
-        user_transactions=user_transactions,
-        buy_modal_errors=buy_modal_errors,
-        sell_modal_errors=sell_modal_errors,
-        user_crypto_values=user_crypto_values,
-    )
-
-
-def get_cryptocurrency_data(code):
-    cryptocurrency_data = Cryptocurrency.query.filter_by(code=code).first()
-    return cryptocurrency_data
+    return user_transactions
 
 
 @views.route("/submit-crypto-buy-modal", methods=["POST"])

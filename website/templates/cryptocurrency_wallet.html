@@ -157,7 +157,7 @@
         <div class="card text-bg-light h-100">
             <div class="card-header">Cryptocurrency Balance</div>
             <div class="card-body">
-                <h5 class="card-title">{{ total_crypto_balance }}</h5>
+                <h5 class="card-title">{{ total_asset_balance }}</h5>
             </div>
         </div>
     </div>
@@ -167,10 +167,10 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-8">
-                        <h5 class="card-title">{{ total_crypto_profit }}</h5>
+                        <h5 class="card-title">{{ total_asset_profit }}</h5>
                     </div>
                     <div class="col-4 text-end">
-                        <p class="card-text">{{ total_crypto_profit_percentage }}</p>
+                        <p class="card-text">{{ total_asset_profit_percentage }}</p>
                     </div>
                 </div>
             </div>
@@ -269,14 +269,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if user_cryptos %}
-                    {% for crypto in user_cryptos %}
+                    {% if user_assets %}
+                    {% for asset in user_assets %}
                     <tr>
-                        <td>{{ crypto.name }} ({{ crypto.code }})</td>
-                        <td>{{ crypto.quantity }}</td>
-                        <td>{{ crypto.value }}</td>
-                        <td>{{ crypto.profit }}</td>
-                        <td>{{ crypto.profit_percentage }}</td>
+                        <td>{{ asset.name }} ({{ asset.code }})</td>
+                        <td>{{ asset.quantity }}</td>
+                        <td>{{ asset.value }}</td>
+                        <td>{{ asset.profit }}</td>
+                        <td>{{ asset.profit_percentage }}</td>
                     </tr>
                     {% endfor %}
                     {% else %}
@@ -368,7 +368,7 @@
         },
     });
 
-    var userCryptoValues = {{ user_crypto_values | tojson | safe }};
+    var userCryptoValues = {{ user_asset_values | tojson | safe }};
 
     for (var key in userCryptoValues) {
         userCryptoValues[key] = parseInt(userCryptoValues[key]);
