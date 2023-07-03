@@ -29,6 +29,45 @@ from website.models import (
 @login_required
 def stock_wallet():
     ############### modal errors ###############
+    buy_modal_errors, sell_modal_errors = modal_errors()
+
+    ############### Getting asset totals for the user ###############
+    user_assets, user_asset_values, asset_balance = calc_asset_totals()
+
+    ############### Calculating total asset profit ###############
+    (
+        total_asset_balance,
+        total_asset_profit,
+        total_asset_profit_percentage,
+        total_invested,
+        total_withdrawn,
+    ) = calc_total_profits(asset_balance)
+
+    ############### Getting the users monthly breakdown ###############
+    total_invested_this_month, total_sold_this_month = calc_monthly_breakdown()
+
+    ############### Compiling transactions for transactions table ###############
+    user_transactions = compiling_transactions_table()
+
+    return render_template(
+        "stock_wallet.html",
+        user=current_user,
+        total_asset_balance=total_asset_balance,
+        total_asset_profit=total_asset_profit,
+        total_asset_profit_percentage=total_asset_profit_percentage,
+        total_invested=total_invested,
+        total_withdrawn=total_withdrawn,
+        total_invested_this_month=total_invested_this_month,
+        total_sold_this_month=total_sold_this_month,
+        user_assets=user_assets,
+        user_transactions=user_transactions,
+        buy_modal_errors=buy_modal_errors,
+        sell_modal_errors=sell_modal_errors,
+        user_asset_values=user_asset_values,
+    )
+
+
+def modal_errors():
     buy_modal_errors = request.args.get("buy_modal_errors")
     sell_modal_errors = request.args.get("sell_modal_errors")
 
@@ -42,7 +81,15 @@ def stock_wallet():
     else:
         sell_modal_errors = {}
 
-    ############### Getting asset totals for the user ###############
+    return buy_modal_errors, sell_modal_errors
+
+
+def get_asset_data(code):
+    asset_data = Stock.query.filter_by(code=code).first()
+    return asset_data
+
+
+def calc_asset_totals():
     user_assets = StockAmount.query.filter_by(user_id=current_user.id).all()
     asset_balance = 0
     user_asset_values = {}
@@ -110,8 +157,10 @@ def stock_wallet():
             else:
                 asset.profit = f"-${asset.profit[1:]}"
             asset.profit_percentage = f"{asset.profit_percentage:,.2f}%"
+    return user_assets, user_asset_values, asset_balance
 
-    ############### Calculating total asset profit ###############
+
+def calc_total_profits(asset_balance):
     total_invested = 0
     total_withdrawn = 0
 
@@ -167,7 +216,16 @@ def stock_wallet():
     total_invested = f"${total_invested:,.2f}"
     total_withdrawn = f"${total_withdrawn:,.2f}"
 
-    ############### Getting the users monthly breakdown ###############
+    return (
+        total_asset_balance,
+        total_asset_profit,
+        total_asset_profit_percentage,
+        total_invested,
+        total_withdrawn,
+    )
+
+
+def calc_monthly_breakdown():
     buy_transactions = StockBuy.query.filter_by(user_id=current_user.id).all()
     sell_transactions = StockSell.query.filter_by(user_id=current_user.id).all()
 
@@ -186,7 +244,10 @@ def stock_wallet():
     total_invested_this_month = f"${total_invested_this_month:,.2f}"
     total_sold_this_month = f"${total_sold_this_month:,.2f}"
 
-    ############### Compiling transactions for transactions table ###############
+    return total_invested_this_month, total_sold_this_month
+
+
+def compiling_transactions_table():
     user_buys = StockBuy.query.filter_by(user_id=current_user.id).all()
     user_sells = StockSell.query.filter_by(user_id=current_user.id).all()
     # marking the buy and sell transactions as buy or sell
@@ -208,27 +269,7 @@ def stock_wallet():
             # changing the date to a string in the format "Day/Month/Year"
             transaction.short_date = transaction.date.strftime("%d/%m/%Y")
 
-    return render_template(
-        "stock_wallet.html",
-        user=current_user,
-        total_asset_balance=total_asset_balance,
-        total_asset_profit=total_asset_profit,
-        total_asset_profit_percentage=total_asset_profit_percentage,
-        total_invested=total_invested,
-        total_withdrawn=total_withdrawn,
-        total_invested_this_month=total_invested_this_month,
-        total_sold_this_month=total_sold_this_month,
-        user_assets=user_assets,
-        user_transactions=user_transactions,
-        buy_modal_errors=buy_modal_errors,
-        sell_modal_errors=sell_modal_errors,
-        user_asset_values=user_asset_values,
-    )
-
-
-def get_asset_data(code):
-    asset_data = Stock.query.filter_by(code=code).first()
-    return asset_data
+    return user_transactions
 
 
 @views.route("/submit-stock-buy-modal", methods=["POST"])
