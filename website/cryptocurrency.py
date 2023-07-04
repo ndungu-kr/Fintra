@@ -25,15 +25,18 @@ def cryptocurrency_wallet():
 
     ############### Getting cryptocurrency asset totals for the user ###############
     user_assets, user_asset_values, asset_balance = calc_asset_totals()
+    total_asset_balance = format_to_2dp_with_commas(asset_balance)
 
     ############### Calculating total asset profit ###############
     (
-        total_asset_balance,
         total_asset_profit,
         total_asset_profit_percentage,
         total_invested,
         total_withdrawn,
-    ) = calc_total_profits(asset_balance)
+    ) = calc_total_profits()
+    # Formatting values
+    total_invested = format_to_2dp_with_commas(total_invested)
+    total_withdrawn = format_to_2dp_with_commas(total_withdrawn)
 
     ############### Getting the users monthly breakdown ###############
     total_invested_this_month, total_sold_this_month = calc_monthly_breakdown()
@@ -146,7 +149,7 @@ def calc_asset_totals():
     return user_assets, user_asset_values, asset_balance
 
 
-def calc_total_profits(asset_balance):
+def calc_total_profits():
     total_invested = 0
     total_withdrawn = 0
     user_buy_transactions = CryptocurrencyBuy.query.filter_by(
@@ -181,6 +184,7 @@ def calc_total_profits(asset_balance):
     total_asset_profit = (
         total_monetary_gained + value_of_remaining_assets - total_crypto_spend
     )
+
     if total_crypto_spend != 0:
         total_asset_profit_percentage = (total_asset_profit / total_crypto_spend) * 100
         total_asset_profit_percentage = f"{total_asset_profit_percentage:,.2f}%"
@@ -193,13 +197,7 @@ def calc_total_profits(asset_balance):
         total_asset_profit_percentage = "0.00%"
         total_asset_profit = "$0.00"
 
-    # formatting to 2 decimal places and adding commas to thousands
-    total_asset_balance = f"${asset_balance:,.2f}"
-    total_invested = f"${total_invested:,.2f}"
-    total_withdrawn = f"${total_withdrawn:,.2f}"
-
     return (
-        total_asset_balance,
         total_asset_profit,
         total_asset_profit_percentage,
         total_invested,
@@ -260,6 +258,10 @@ def compiling_transactions_table():
             transaction.short_date = transaction.date.strftime("%d/%m/%Y")
 
     return user_transactions
+
+
+def format_to_2dp_with_commas(value):
+    return f"${value:,.2f}"
 
 
 @views.route("/submit-crypto-buy-modal", methods=["POST"])
