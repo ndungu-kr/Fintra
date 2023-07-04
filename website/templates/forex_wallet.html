@@ -178,9 +178,9 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card">
-            <div class="card-header">Forex Portfolio Performance</div>
+            <div class="card-header">Monthly Total Forex Investment</div>
             <div class="card-body">
-                <canvas id="forexPerformanceGraph"></canvas>
+                <canvas id="sumForexInvestments"></canvas>
             </div>
         </div>
     </div>
@@ -348,17 +348,35 @@
         });
     }
 
-    // Forex Performance Chart
-    const cty = document.getElementById('forexPerformanceGraph');
+    // 
+
+    var fiveMonthHistory = {{ five_month_history | tojson | safe }};
+
+    var convertedDictionary = {};
+
+    for (var key in fiveMonthHistory) {
+        if (fiveMonthHistory.hasOwnProperty(key)) {
+            var dateObj = new Date(key);
+            var month = dateObj.toLocaleString('en-US', { month: 'long' });
+            convertedDictionary[month] = fiveMonthHistory[key];
+        }
+    }
+
+    console.log(convertedDictionary);
+
+    var monthNames = Object.keys(convertedDictionary);
+    var monthValues = Object.values(convertedDictionary);
+
+    // Cryptocurrency Performance Chart
+    const cty = document.getElementById('sumForexInvestments');
     new Chart(cty, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: monthNames,
             datasets: [{
-                label: 'Forex Value',
-                data: [12, 19, -3, 5, 2, 3],
+                label: 'Sum of investments in USD',
+                data: monthValues,
                 fill: false,
-                borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
             }]
         },
