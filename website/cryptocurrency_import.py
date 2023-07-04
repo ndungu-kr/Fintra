@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 import requests
 from os import path, getcwd
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import csv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

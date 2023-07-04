@@ -1,5 +1,3 @@
-from multiprocessing import Process
-import threading
 from website import create_app
 from website.loops import start_crypto_thread, start_currency_thread, start_stock_thread
 

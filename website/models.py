@@ -2,9 +2,10 @@ from email.policy import default
 from enum import unique
 from . import db
 from flask_login import UserMixin
-from sqlalchemy.sql import func
 from sqlalchemy.orm import backref
 from datetime import datetime
+
+# from sqlalchemy.sql import func
 
 
 class User(db.Model, UserMixin):
