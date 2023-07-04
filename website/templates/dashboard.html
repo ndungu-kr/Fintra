@@ -6,120 +6,28 @@
     <div class="col-md-12 fw-bold fs-3 mb-3">Dashboard</div>
 </div>
 
-<!-- Wallet Metadata -->
+<!--Totals -->
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
             <div class="card-header">Net Worth</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
+                <h5 class="card-title">{{ net_worth }}</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss</div>
+            <div class="card-header">Profit/Loss (incl. withdrawals)</div>
             <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--
-<div class="row">
-    <div class="col-md-12 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Investment Wallet</div>
-            <div class="card-body">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h2 class="card-title">$0.00</h2>
-                            <p class="card-text">This is your uninvested cash balance</p>
-                        </div>
-                        <div class="col-sm-3">
-
-                            <button type="button" class="btn btn-success m-1 w-100" data-bs-toggle="modal"
-                                data-bs-target="#depositModal">Deposit</button>
-
-                            <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h1 class="modal-title fs-5" id="depositModalLabel">Modal title</h1>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            ...
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button type="button" class="btn btn-success m-1 w-100" data-bs-toggle="modal"
-                                data-bs-target="#withdrawModal">Withdraw</button>
-
-                            <div class="modal fade" id="withdrawModal" tabindex="-1"
-                                aria-labelledby="withdrawModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h1 class="modal-title fs-5" id="withdrawModalLabel">withdraw</h1>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            ...
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">{{ total_profit }}</h5>
+                    </div>
+                    <div class="col-4 text-end">
+                        <p class="card-text">{{ total_profit_percentage }}</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
--->
-
-<!-- Monthly Breakdown -->
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Total Invested this Month</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-3">
-        <div class="card text-bg-light h-100">
-            <div class="card-header">Profit/Loss this Month</div>
-            <div class="card-body">
-                <h5 class="card-title">$0.00</h5>
             </div>
         </div>
     </div>
@@ -137,25 +45,66 @@
     </div>
 </div>
 
+<!-- Users invested and withdrawals -->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ sum_of_invested }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Withdrawals</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ sum_of_withdrawals }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Charts -->
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="card h-100">
-            <div class="card-header">Portfolio Distribution by Asset Pie Chart</div>
+            <div class="card-header">Portfolio Distribution by Asset</div>
             <div class="card-body">
-                <canvas id="portfolioDistribution" width="400" height="400"></canvas>
+                <canvas id="distributionByAsset" width="400" height="400"></canvas>
             </div>
         </div>
     </div>
     <div class="col-md-6 mb-3">
         <div class="card h-100">
-            <div class="card-header">Largest Positions by Market Value</div>
+            <div class="card-header">Top 5 Positions by Market Value</div>
             <div class="card-body">
                 <canvas id="positionsByMarketValue" width="400" height="400"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Monthly Breakdown -->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Total Invested this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_invested_this_month }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Withdrawn this Month</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_withdrawn_this_month }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     // Portfolio Performance Chart
@@ -175,37 +124,58 @@
     });
 
     // Portfolio Distribution Chart
-    const ctz = document.getElementById('portfolioDistribution');
+
+    var assetVaues = {{ asset_values | tojson | safe }};
+
+    for (var key in assetVaues) {
+        assetVaues[key] = parseInt(assetVaues[key]);
+    }
+
+    // sorting the object by value
+    assetVaues = Object.fromEntries(
+        Object.entries(assetVaues).sort(([, a], [, b]) => b - a)
+    );
+
+    var assetNames = Object.keys(assetVaues);
+    var assetValues = Object.values(assetVaues);
+
+    const ctz = document.getElementById('distributionByAsset');
     new Chart(ctz, {
         type: 'doughnut',
         data: {
-            labels: [
-                'Cryptocurrency',
-                'Forex',
-                'Stock'
-            ],
+            labels: assetNames,
             datasets: [{
-                label: 'My First Dataset',
-                data: [300, 50, 100],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
+                label: 'Portfolio Distribution',
+                data: assetValues,
                 hoverOffset: 4
             }]
         },
     });
 
     // Positions by Market Value Chart
+
+    var topAssets = {{ top_5_assets | tojson | safe }};
+
+    for (var key in topAssets) {
+        topAssets[key] = parseInt(topAssets[key]);
+    }
+
+    // sorting the object by value
+    topAssets = Object.fromEntries(
+        Object.entries(topAssets).sort(([, a], [, b]) => b - a)
+    );
+
+    var topAssetNames = Object.keys(topAssets);
+    var topAssetValues = Object.values(topAssets);
+
     const ctx = document.getElementById('positionsByMarketValue');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Bitcoin', 'Tesla', 'Apple', 'USD', 'GBP', 'Ethereum'],
+            labels: topAssetNames,
             datasets: [{
                 label: 'Value in USD',
-                data: [12000, 1900, 3000, 5000, 2000, 3000],
+                data: topAssetValues,
                 borderWidth: 1
             }]
         },

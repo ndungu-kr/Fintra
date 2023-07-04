@@ -35,11 +35,6 @@
                 <div class="d-flex ms-auto">
                     <ul class="navbar-nav mb-2 mb-lg-0 ">
                         {% if user.is_authenticated %}
-                        <span class="navbar-text">
-                            $0.00
-                        </span>
-                        <!-- <button type="button" class="btn btn-primary btn-sm m-1 w-100">Buy</button>
-                        <button type="button" class="btn btn-secondary btn-sm m-1 w-100">Sell</button> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -122,70 +117,6 @@
                                 Stocks
                             </span>
                         </a>
-                    </li>
-                    <li>
-                        <div class="text-muted small fw-bold text-uppercase px-3">Transactions</div>
-                    </li>
-                    <li>
-                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse" href="#buyAssetsCollapse"
-                            role="button" aria-expanded="false" aria-controls="buyAssetsCollapse">
-                            <span class="me-2"><i class="bi bi-cart"></i></span>
-                            <span>Buy Assets</span>
-                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
-                        </a>
-                        <div class="collapse" id="buyAssetsCollapse">
-                            <div>
-                                <ul class="navbar-nav ps-3">
-                                    <li>
-                                        <a class="nav-link px-3 active"
-                                            href="/cryptocurrency-wallet/buy-cryptocurrency">
-                                            <span>Cryptocurrency</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/forex-wallet/buy-forex">
-                                            <span>Forex</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/stock-wallet/buy-stock">
-                                            <span>Stocks</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse"
-                            href="#sellAssetsCollapse" role="button" aria-expanded="false"
-                            aria-controls="sellAssetsCollapse">
-                            <span class="me-2"><i class="bi bi-cash-stack"></i></span>
-                            <span>Sell Assets</span>
-                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
-                        </a>
-                        <div class="collapse" id="sellAssetsCollapse">
-                            <div>
-                                <ul class="navbar-nav ps-3">
-                                    <li>
-                                        <a class="nav-link px-3 active"
-                                            href="/cryptocurrency-wallet/sell-cryptocurrency">
-                                            <span>Cryptocurrency</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/forex-wallet/sell-forex">
-                                            <span>Forex</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="nav-link px-3 active" href="/stock-wallet/sell-stock">
-                                            <span>Stocks</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
                     </li>
                 </ul>
             </nav>
