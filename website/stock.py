@@ -48,6 +48,9 @@ def stock_wallet():
 
     ############### Getting the users monthly breakdown ###############
     total_invested_this_month, total_sold_this_month = calc_monthly_breakdown()
+    # Formatting values
+    total_invested_this_month = format_to_2dp_with_commas(total_invested_this_month)
+    total_sold_this_month = format_to_2dp_with_commas(total_sold_this_month)
 
     ############### Compiling transactions for transactions table ###############
     user_transactions = compiling_transactions_table()
@@ -237,10 +240,6 @@ def calc_monthly_breakdown():
     for sell in sell_transactions:
         if sell.date.month == datetime.now().month:
             total_sold_this_month += sell.monetary_amount
-
-    # formating after as we need to calculate the total invested this month first
-    total_invested_this_month = f"${total_invested_this_month:,.2f}"
-    total_sold_this_month = f"${total_sold_this_month:,.2f}"
 
     return total_invested_this_month, total_sold_this_month
 
