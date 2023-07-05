@@ -37,9 +37,9 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card h-100">
-            <div class="card-header">Overall Portfolio Performance Chart</div>
+            <div class="card-header">Monthly Portfolio Investment</div>
             <div class="card-body">
-                <canvas id="portfolioPerformanceChart"></canvas>
+                <canvas id="sumOfInvestments"></canvas>
             </div>
         </div>
     </div>
@@ -107,17 +107,35 @@
 
 
 <script>
+    // 
+
+    var investmentHistory = {{ investment_history | tojson | safe }};
+
+    var convertedDictionary = {};
+
+    for (var key in investmentHistory) {
+        if (investmentHistory.hasOwnProperty(key)) {
+            var dateObj = new Date(key);
+            var month = dateObj.toLocaleString('en-US', { month: 'long' });
+            convertedDictionary[month] = investmentHistory[key];
+        }
+    }
+
+    console.log(convertedDictionary);
+
+    var monthNames = Object.keys(convertedDictionary);
+    var monthValues = Object.values(convertedDictionary);
+
     // Portfolio Performance Chart
-    const cty = document.getElementById('portfolioPerformanceChart');
+    const cty = document.getElementById('sumOfInvestments');
     new Chart(cty, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: monthNames,
             datasets: [{
-                label: 'Portfolio Value',
-                data: [12, 19, -3, 5, 2, 3],
+                label: 'Sum of investments in USD',
+                data: monthValues,
                 fill: false,
-                borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
             }]
         },

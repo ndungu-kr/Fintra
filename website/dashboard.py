@@ -2,21 +2,25 @@ from flask import render_template
 from flask_login import current_user, login_required
 from website.views import views
 from . import db
+from decimal import Decimal
 
 from website.cryptocurrency import (
     calc_asset_totals as calc_crypto_totals,
     calc_total_profits as calc_crypto_profits,
     calc_monthly_breakdown as calc_crypto_monthly_breakdown,
+    investment_history as crypto_investment_history,
 )
 from website.forex import (
     calc_asset_totals as calc_forex_totals,
     calc_total_profits as calc_forex_profits,
     calc_monthly_breakdown as calc_forex_monthly_breakdown,
+    investment_history as forex_investment_history,
 )
 from website.stock import (
     calc_asset_totals as calc_stock_totals,
     calc_total_profits as calc_stock_profits,
     calc_monthly_breakdown as calc_stock_monthly_breakdown,
+    investment_history as stock_investment_history,
 )
 
 
@@ -97,6 +101,19 @@ def dashboard():
         crypto_sold_this_month + forex_sold_this_month + stock_sold_this_month
     )
 
+    # Calculating investment history
+    crypto_history = crypto_investment_history()
+    forex_history = forex_investment_history()
+    stock_history = stock_investment_history()
+
+    # adding the values of the three dictionaries together
+    investment_history = {}
+    for key in crypto_history:
+        value1 = Decimal(crypto_history[key])
+        value2 = Decimal(forex_history[key])
+        value3 = Decimal(stock_history[key])
+        investment_history[key] = str(value1 + value2 + value3)
+
     # Formatting values
     net_worth = format_to_2dp_with_commas(net_worth)
     sum_of_invested = format_to_2dp_with_commas(sum_of_invested)
@@ -116,6 +133,7 @@ def dashboard():
         total_withdrawn_this_month=total_withdrawn_this_month,
         asset_values=asset_values,
         top_5_assets=top_5_assets,
+        investment_history=investment_history,
     )
 
 
