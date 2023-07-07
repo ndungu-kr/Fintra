@@ -101,6 +101,10 @@ class Cryptocurrency(db.Model):
     code = db.Column(db.String(5), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False, default=0)
+    market_cap = db.Column(db.DECIMAL, nullable=False, default=0)
+    circulating_supply = db.Column(db.DECIMAL, nullable=False, default=0)
+    total_supply = db.Column(db.DECIMAL, nullable=False, default=0)
+    max_supply = db.Column(db.DECIMAL, nullable=False, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     crytocurrency_purchased = db.relationship(
         "CryptocurrencyBuy", backref="crytocurrency_purchased", lazy=True
