@@ -7,3 +7,5 @@ from website.forex import *
 from website.stock import *
 from website.cryptocurrency import *
 from website.dashboard import *
+from website.exchanges import *
+from website.cryptocurrencies import *
