@@ -38,9 +38,6 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GBP">
-                            <option value="EUR">
-                            <option value="JPY">
                         </datalist>
                     </div>
 
@@ -104,9 +101,6 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GBP">
-                            <option value="EUR">
-                            <option value="JPY">
                         </datalist>
                     </div>
 
@@ -348,6 +342,16 @@
         });
     }
 
+    // Populating the datalist
+    var assetCodes = {{ asset_codes | tojson | safe }};
+    var assetOptions = document.getElementById('assetOptions');
+
+    assetCodes.forEach(function (code) {
+        var optionElement = document.createElement('option');
+        optionElement.value = code;
+        assetOptions.appendChild(optionElement);
+    });
+
     // 
 
     var fiveMonthHistory = {{ five_month_history | tojson | safe }};
@@ -367,7 +371,7 @@
     var monthNames = Object.keys(convertedDictionary);
     var monthValues = Object.values(convertedDictionary);
 
-    // Cryptocurrency Performance Chart
+    // Asset Performance Chart
     const cty = document.getElementById('sumForexInvestments');
     new Chart(cty, {
         type: 'line',

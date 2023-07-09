@@ -38,9 +38,6 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GOOG">
-                            <option value="TSLA">
-                            <option value="AAPL">
                         </datalist>
                     </div>
 
@@ -53,9 +50,6 @@
                         <input class="form-control" list="exchangeOptions" id="exchange" name="exchange"
                             placeholder="Type to search...">
                         <datalist id="exchangeOptions">
-                            <option value="New York Stock Exchange">
-                            <option value="NASDAQ Stock Exchange">
-                            <option value="London Stock Exchange">
                         </datalist>
                     </div>
 
@@ -119,9 +113,6 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GOOG">
-                            <option value="TSLA">
-                            <option value="AAPL">
                         </datalist>
                     </div>
 
@@ -134,9 +125,6 @@
                         <input class="form-control" list="exchangeOptions" id="exchange" name="exchange"
                             placeholder="Type to search...">
                         <datalist id="exchangeOptions">
-                            <option value="New York Stock Exchange">
-                            <option value="NASDAQ Stock Exchange">
-                            <option value="London Stock Exchange">
                         </datalist>
                     </div>
 
@@ -377,6 +365,26 @@
             sellModalButton.click();
         });
     }
+
+    // Populating the asset code datalist
+    var assetCodes = {{ asset_codes | tojson | safe }};
+    var assetOptions = document.getElementById('assetOptions');
+
+    assetCodes.forEach(function (code) {
+        var optionElement = document.createElement('option');
+        optionElement.value = code;
+        assetOptions.appendChild(optionElement);
+    });
+
+    // Populating the exchanges datalist
+    var exchanges = {{ exchanges | tojson | safe }};
+    var exchangeOptions = document.getElementById('exchangeOptions');
+
+    exchanges.forEach(function (code) {
+        var exchangeOption = document.createElement('option');
+        exchangeOption.value = code;
+        exchangeOptions.appendChild(exchangeOption);
+    });
 
     // 
 

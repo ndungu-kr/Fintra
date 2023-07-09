@@ -49,6 +49,8 @@ def cryptocurrency_wallet():
 
     five_month_history = investment_history()
 
+    cryptocurrency_codes = get_cryptocurency_codes()
+
     return render_template(
         "cryptocurrency_wallet.html",
         user=current_user,
@@ -65,6 +67,7 @@ def cryptocurrency_wallet():
         sell_modal_errors=sell_modal_errors,
         user_asset_values=user_asset_values,
         five_month_history=five_month_history,
+        cryptocurrency_codes=cryptocurrency_codes,
     )
 
 
@@ -361,6 +364,14 @@ def investment_history():
     }
 
     return investment_history
+
+
+def get_cryptocurency_codes():
+    cryptocurrencies = Cryptocurrency.query.all()
+    cryptocurrency_codes = []
+    for cryptocurrency in cryptocurrencies:
+        cryptocurrency_codes.append(cryptocurrency.code)
+    return cryptocurrency_codes
 
 
 @views.route("/submit-crypto-buy-modal", methods=["POST"])

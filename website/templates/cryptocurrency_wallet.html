@@ -42,9 +42,6 @@
                         <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList"
                             name="cryptocurrency" placeholder="Type to search...">
                         <datalist id="cryptocurrencyOptions">
-                            <option value="BTC">
-                            <option value="ETH">
-                            <option value="USDT">
                         </datalist>
                     </div>
 
@@ -108,9 +105,6 @@
                         <input class="form-control" list="cryptocurrencyOptions" id="cryptocurrencyDataList"
                             name="cryptocurrency" placeholder="Type to search...">
                         <datalist id="cryptocurrencyOptions">
-                            <option value="BTC">
-                            <option value="ETH">
-                            <option value="USDT">
                         </datalist>
                     </div>
 
@@ -351,6 +345,16 @@
             sellModalButton.click();
         });
     }
+
+    // Populating the datalist
+    var cryptocurrencyCodes = {{ cryptocurrency_codes | tojson | safe }};
+    var cryptocurrencyOptions = document.getElementById('cryptocurrencyOptions');
+
+    cryptocurrencyCodes.forEach(function (code) {
+        var optionElement = document.createElement('option');
+        optionElement.value = code;
+        cryptocurrencyOptions.appendChild(optionElement);
+    });
 
     // 
 

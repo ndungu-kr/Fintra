@@ -51,6 +51,9 @@ def stock_wallet():
 
     five_month_history = investment_history()
 
+    asset_codes = get_asset_codes()
+    exchanges = get_exchanges()
+
     return render_template(
         "stock_wallet.html",
         user=current_user,
@@ -67,6 +70,8 @@ def stock_wallet():
         sell_modal_errors=sell_modal_errors,
         user_asset_values=user_asset_values,
         five_month_history=five_month_history,
+        asset_codes=asset_codes,
+        exchanges=exchanges,
     )
 
 
@@ -264,6 +269,22 @@ def compiling_transactions_table():
             transaction.short_date = transaction.date.strftime("%d/%m/%Y")
 
     return user_transactions
+
+
+def get_asset_codes():
+    assets = Stock.query.all()
+    asset_codes = []
+    for asset in assets:
+        asset_codes.append(asset.code)
+    return asset_codes
+
+
+def get_exchanges():
+    exchanges = Exchange.query.all()
+    exchange_names = []
+    for exchange in exchanges:
+        exchange_names.append(exchange.name)
+    return exchange_names
 
 
 def format_to_2dp_with_commas(value):

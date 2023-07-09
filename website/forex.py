@@ -54,6 +54,8 @@ def forex_wallet():
 
     five_month_history = investment_history()
 
+    asset_codes = get_asset_codes()
+
     return render_template(
         "forex_wallet.html",
         user=current_user,
@@ -70,6 +72,7 @@ def forex_wallet():
         buy_modal_errors=buy_modal_errors,
         sell_modal_errors=sell_modal_errors,
         five_month_history=five_month_history,
+        asset_codes=asset_codes,
     )
 
 
@@ -367,6 +370,14 @@ def investment_history():
     }
 
     return investment_history
+
+
+def get_asset_codes():
+    assets = holding.query.all()
+    asset_codes = []
+    for asset in assets:
+        asset_codes.append(asset.code)
+    return asset_codes
 
 
 @views.route("/submit-forex-buy-modal", methods=["POST"])
