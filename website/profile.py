@@ -14,10 +14,6 @@ def profile():
     goal_modal_errors, profile_modal_errors = modal_errors()
 
     user_goals = get_user_goals(user=current_user)
-    print(user_goals)
-
-    for goal in user_goals:
-        print(goal.yearly_goal)
 
     if user_goals:
         # latest goal is the user goal with the latest date
