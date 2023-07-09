@@ -492,51 +492,18 @@ def submit_forex_sell():
     modal_errors = []
 
     # check that inputs were entered and if so return them
-    (
-        asset_code,
-        asset_amount,
-        monetary_amount,
-        date,
-        description,
-    ) = check_for_sell_inputs(modal_errors)
-
-    # check that inputs are valid
-    check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_amount)
-
-    # adding transaction to sell asset sell
-    add_to_asset_sell = holdingSell(
-        code=asset_code,
-        user_id=current_user.id,
-        quantity=asset_amount,
-        monetary_amount=monetary_amount,
-        description=description,
-        date=date,
-    )
-    db.session.add(add_to_asset_sell)
-
-    # updating the asset amounts table
-    user_asset_amount = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-    user_asset_amount.quantity -= asset_amount
-
-    # if the user has sold all of their asset, delete the row from the table
-    if user_asset_amount.quantity == 0:
-        db.session.delete(user_asset_amount)
-
-    db.session.commit()
-
-    flash("Forex asset successfully sold.", category="success")
-    return redirect(url_for("views.forex_wallet"))
-
-
-def check_for_sell_inputs(modal_errors):
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
 
+    user_owns_asset = holdingAmount.query.filter_by(
+        code=asset_code, user_id=current_user.id
+    ).first()
+
     if len(asset_code) == 0:
         modal_errors.append("Please select a forex asset.")
+    elif user_owns_asset is None:
+        modal_errors.append("You do not own this forex asset.")
 
     try:
         asset_amount = decimal.Decimal(request.form.get("assetAmount"))
@@ -562,23 +529,15 @@ def check_for_sell_inputs(modal_errors):
             url_for("views.forex_wallet", sell_modal_errors=sell_modal_errors)
         )
 
-    return asset_code, asset_amount, monetary_amount, date, description
-
-
-def check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_amount):
-    user_owns_asset = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-
-    if user_owns_asset is None:
-        modal_errors.append("You do not own this forex asset.")
-
     # checking that the inputs made are valid
     if asset_amount == 0 or asset_amount < 0 or asset_amount is None:
         modal_errors.append("Please enter a valid forex asset amount.")
 
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
+
+    if user_owns_asset.quantity < asset_amount:
+        modal_errors.append("You do not own enough of this asset for this transaction.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:
@@ -587,3 +546,29 @@ def check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_a
         return redirect(
             url_for("views.forex_wallet", sell_modal_errors=sell_modal_errors)
         )
+    else:
+        # adding transaction to sell asset sell
+        add_to_asset_sell = holdingSell(
+            code=asset_code,
+            user_id=current_user.id,
+            quantity=asset_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=date,
+        )
+        db.session.add(add_to_asset_sell)
+
+        # updating the asset amounts table
+        user_asset_amount = holdingAmount.query.filter_by(
+            code=asset_code, user_id=current_user.id
+        ).first()
+        user_asset_amount.quantity -= asset_amount
+
+        # if the user has sold all of their asset, delete the row from the table
+        if user_asset_amount.quantity == 0:
+            db.session.delete(user_asset_amount)
+
+        db.session.commit()
+
+        flash("Forex asset successfully sold.", category="success")
+        return redirect(url_for("views.forex_wallet"))
