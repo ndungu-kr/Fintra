@@ -1,0 +1,44 @@
+{% extends "base.html"%}
+{% block title %}Supported Forex Assets{% endblock %}
+
+{% block content %}
+
+<div class="row mb-2">
+    <div class="col-sm-12 fs-2 fw-bold mb-1 justify-content-start">Supported Forex Assets</div>
+    <p> Below is a list of the currencies supported on the website, sorted in alphabetical order of the currencies ISO
+        code.
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Code</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Currency/USD</th>
+                        <th scope="col">USD/Currency</th>
+                        <th scope="col">Last Updated (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for currency in currencies %}
+                    <tr>
+                        <td>{{ currency.code }}</td>
+                        <td>{{ currency.name }}</td>
+                        <td>{{ currency.symbol }}</td>
+                        <td>{{ currency.current_price }}</td>
+                        <td>{{ currency.usd_price }}</td>
+                        <td>{{ currency.last_updated }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
