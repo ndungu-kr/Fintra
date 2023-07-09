@@ -426,6 +426,10 @@ def submit_crypto_buy():
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
 
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
+
     if len(modal_errors) > 0:
         for error in modal_errors:
             flash(error, category="modal_error")
@@ -520,6 +524,10 @@ def submit_crypto_sell():
 
     if user_owns_crypto.quantity < cryptocurrency_amount:
         modal_errors.append("You do not own enough of this asset for this transaction.")
+
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:

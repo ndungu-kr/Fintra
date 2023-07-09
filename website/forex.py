@@ -385,52 +385,17 @@ def submit_forex_buy():
     modal_errors = []
 
     # check that inputs were entered and if so return them
-    asset_code, asset_amount, monetary_amount, date, description = check_for_buy_inputs(
-        modal_errors
-    )
-
-    # check that inputs are valid
-    check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_code)
-
-    # adding transaction to buy asset
-    add_to_asset_buy = holdingBuy(
-        code=asset_code,
-        user_id=current_user.id,
-        quantity=asset_amount,
-        monetary_amount=monetary_amount,
-        description=description,
-        date=date,
-    )
-    db.session.add(add_to_asset_buy)
-
-    # updating the asset amounts table if the user already owns the asset
-    user_owns_asset = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-    if user_owns_asset is None:
-        add_to_asset_amounts = holdingAmount(
-            code=asset_code,
-            quantity=asset_amount,
-            user_id=current_user.id,
-        )
-        db.session.add(add_to_asset_amounts)
-    else:
-        user_owns_asset.quantity += asset_amount
-
-    db.session.commit()
-
-    flash("Forex asset successfully purchased.", category="success")
-    return redirect(url_for("views.forex_wallet"))
-
-
-def check_for_buy_inputs(modal_errors):
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
 
+    asset_code_exists = holding.query.filter_by(code=asset_code).first()
+
     # checking that a forex code was entered
     if len(asset_code) == 0:
         modal_errors.append("Please select a forex asset.")
+    elif asset_code_exists is None:
+        modal_errors.append("Please enter a valid forex asset code.")
 
     # checking that a asset amount was entered
     try:
@@ -459,10 +424,6 @@ def check_for_buy_inputs(modal_errors):
             url_for("views.forex_wallet", buy_modal_errors=buy_modal_errors)
         )
 
-    return asset_code, asset_amount, monetary_amount, date, description
-
-
-def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_code):
     # checking that a valid asset amount was entered
     if asset_amount == 0 or asset_amount < 0 or asset_amount is None:
         modal_errors.append("Please enter a valid asset amount.")
@@ -471,11 +432,9 @@ def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
 
-    asset_code_exists = holding.query.filter_by(code=asset_code).first()
-
-    # checking that the forex asset code is exists in db
-    if asset_code_exists is None:
-        modal_errors.append("Please enter a valid forex asset code.")
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
 
     # confirming that the inputs are valid
     if len(modal_errors) > 0:
@@ -485,6 +444,36 @@ def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_
         return redirect(
             url_for("views.forex_wallet", buy_modal_errors=buy_modal_errors)
         )
+    else:
+        # adding transaction to buy asset
+        add_to_asset_buy = holdingBuy(
+            code=asset_code,
+            user_id=current_user.id,
+            quantity=asset_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=date,
+        )
+        db.session.add(add_to_asset_buy)
+
+        # updating the asset amounts table if the user already owns the asset
+        user_owns_asset = holdingAmount.query.filter_by(
+            code=asset_code, user_id=current_user.id
+        ).first()
+        if user_owns_asset is None:
+            add_to_asset_amounts = holdingAmount(
+                code=asset_code,
+                quantity=asset_amount,
+                user_id=current_user.id,
+            )
+            db.session.add(add_to_asset_amounts)
+        else:
+            user_owns_asset.quantity += asset_amount
+
+        db.session.commit()
+
+        flash("Forex asset successfully purchased.", category="success")
+        return redirect(url_for("views.forex_wallet"))
 
 
 @views.route("/submit-forex-sell-modal", methods=["POST"])
@@ -538,6 +527,10 @@ def submit_forex_sell():
 
     if user_owns_asset.quantity < asset_amount:
         modal_errors.append("You do not own enough of this asset for this transaction.")
+
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:
