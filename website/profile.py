@@ -19,8 +19,8 @@ def profile():
         # latest goal is the user goal with the latest date
         latest_user_goal = user_goals[-1]
 
-        latest_user_goal.yearly_goal = format_to_2dp_with_commas(
-            latest_user_goal.yearly_goal
+        latest_user_goal.monthly_goal = format_to_2dp_with_commas(
+            latest_user_goal.monthly_goal
         )
         if latest_user_goal.crypto_goal is not None:
             latest_user_goal.crypto_goal = format_to_2dp_with_commas(
@@ -34,6 +34,8 @@ def profile():
             latest_user_goal.stock_goal = format_to_2dp_with_commas(
                 latest_user_goal.stock_goal
             )
+    else:
+        latest_user_goal = None
 
     return render_template(
         "profile.html",
@@ -73,19 +75,19 @@ def modal_errors():
 
 @views.route("/edit-goals", methods=["POST"])
 def edit_goals():
-    yearly_goal = request.form.get("yearly_goal")
+    monthly_goal = request.form.get("monthly_goal")
     crypto_goal = request.form.get("crypto_goal")
     forex_goal = request.form.get("forex_goal")
     stock_goal = request.form.get("stock_goal")
     goal_modal_errors = []
 
-    if len(yearly_goal) == 0:
-        goal_modal_errors.append("Yearly goal cannot be empty")
+    if len(monthly_goal) == 0:
+        goal_modal_errors.append("Monthly goal cannot be empty")
 
     try:
-        yearly_goal = decimal.Decimal(yearly_goal)
+        monthly_goal = decimal.Decimal(monthly_goal)
     except decimal.InvalidOperation:
-        goal_modal_errors.append("Please enter a valid number for yearly goal.")
+        goal_modal_errors.append("Please enter a valid number for monthly goal.")
 
     if len(goal_modal_errors) > 0:
         for error in goal_modal_errors:
@@ -109,9 +111,9 @@ def edit_goals():
 
         total_goals = crypto_goal + forex_goal + stock_goal
 
-        if yearly_goal != total_goals:
+        if monthly_goal != total_goals:
             goal_modal_errors.append(
-                "Yearly goal must equal the sum of all other goals."
+                "Monthly goal must equal the sum of all other goals."
             )
 
         if len(goal_modal_errors) > 0:
@@ -128,7 +130,7 @@ def edit_goals():
 
     add_goals = Goals(
         user_id=current_user.id,
-        yearly_goal=yearly_goal,
+        monthly_goal=monthly_goal,
         crypto_goal=crypto_goal,
         forex_goal=forex_goal,
         stock_goal=stock_goal,

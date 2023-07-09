@@ -82,24 +82,24 @@
                     <div class="alert alert-info">
                         <ul>
                             <li>Asset goals are optional</li>
-                            <li>Asset goals must add up to your yearly goal</li>
+                            <li>Asset goals must add up to your monthly goal</li>
                         </ul>
                     </div>
                     <div class="mb-3">
-                        <label for="yearlyGoal" class="form-label">Yearly Goal</label>
-                        <input class="form-control" id="yearlyGoal" name="yearly_goal" placeholder="i.e. 18000">
+                        <label for="monthlyGoal" class="form-label">Monthly Goal</label>
+                        <input class="form-control" id="monthlyGoal" name="monthly_goal" placeholder="i.e. 1500">
                     </div>
                     <div class="mb-3">
-                        <label for="yearlyCryptoGoal" class="form-label">Cryptocurrency Goal (optional)</label>
-                        <input class="form-control" id="yearlyCryptoGoal" name="crypto_goal" placeholder="i.e. 6000">
+                        <label for="monthlyCryptoGoal" class="form-label">Cryptocurrency Goal (optional)</label>
+                        <input class="form-control" id="monthlyCryptoGoal" name="crypto_goal" placeholder="i.e. 500">
                     </div>
                     <div class="mb-3">
-                        <label for="yearlyForexGoal" class="form-label">Forex Goal (optional)</label>
-                        <input class="form-control" id="yearlyForexGoal" name="forex_goal" placeholder="i.e. 6000">
+                        <label for="monthlyForexGoal" class="form-label">Forex Goal (optional)</label>
+                        <input class="form-control" id="monthlyForexGoal" name="forex_goal" placeholder="i.e. 500">
                     </div>
                     <div class="mb-3">
-                        <label for="yearlyStockGoal" class="form-label">Stock Goal (optional)</label>
-                        <input class="form-control" id="yearlyStockGoal" name="stock_goal" placeholder="i.e. 6000">
+                        <label for="monthlyStockGoal" class="form-label">Stock Goal (optional)</label>
+                        <input class="form-control" id="monthlyStockGoal" name="stock_goal" placeholder="i.e. 500">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -125,9 +125,9 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Yearly Overall Investment Goal</div>
+            <div class="card-header">Monthly Overall Goal</div>
             <div class="card-body">
-                <h5 class="card-title">{{ latest_user_goal.yearly_goal if latest_user_goal }}</h5>
+                <h5 class="card-title">{{ latest_user_goal.monthly_goal if latest_user_goal }}</h5>
             </div>
         </div>
     </div>
@@ -136,7 +136,7 @@
 <div class="row">
     <div class="col-md-4 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Yearly Cryptocurrency Goal</div>
+            <div class="card-header">Monthly Cryptocurrency Goal</div>
             <div class="card-body">
                 <h5 class="card-title">{{ latest_user_goal.crypto_goal if latest_user_goal }}</h5>
             </div>
@@ -144,7 +144,7 @@
     </div>
     <div class="col-md-4 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Yearly Forex Goal</div>
+            <div class="card-header">Monthly Forex Goal</div>
             <div class="card-body">
                 <h5 class="card-title">{{ latest_user_goal.forex_goal if latest_user_goal }}</h5>
             </div>
@@ -152,7 +152,7 @@
     </div>
     <div class="col-md-4 mb-3">
         <div class="card text-bg-light h-100">
-            <div class="card-header">Yearly Stock Goal</div>
+            <div class="card-header">Monthly Stock Goal</div>
             <div class="card-body">
                 <h5 class="card-title">{{ latest_user_goal.stock_goal if latest_user_goal }}</h5>
             </div>

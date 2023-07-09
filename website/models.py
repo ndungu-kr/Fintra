@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
 class Goals(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    yearly_goal = db.Column(db.DECIMAL, nullable=False, default=0)
+    monthly_goal = db.Column(db.DECIMAL, nullable=False, default=0)
     crypto_goal = db.Column(db.DECIMAL, nullable=False, default=0)
     forex_goal = db.Column(db.DECIMAL, nullable=False, default=0)
     stock_goal = db.Column(db.DECIMAL, nullable=False, default=0)
