@@ -109,6 +109,14 @@ def edit_goals():
         except decimal.InvalidOperation:
             goal_modal_errors.append("Please enter a valid number for stock goal.")
 
+        if len(goal_modal_errors) > 0:
+            for error in goal_modal_errors:
+                flash(error, category="modal_error")
+            goal_modal_errors = json.dumps(goal_modal_errors)
+            return redirect(
+                url_for("views.profile", goal_modal_errors=goal_modal_errors)
+            )
+
         total_goals = crypto_goal + forex_goal + stock_goal
 
         if monthly_goal != total_goals:
