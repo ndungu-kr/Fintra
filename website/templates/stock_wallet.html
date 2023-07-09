@@ -38,20 +38,18 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GOOG">
-                            <option value="TSLA">
-                            <option value="AAPL">
                         </datalist>
                     </div>
 
                     <div class="mb-3">
-                        <label for="exchange" class="form-label">Exchange</label>
+                        <div class="row">
+                            <div class="col"><label for="exchange" class="form-label">Exchange</label></div>
+                            <div class="col text-end"><a href="/exchanges" class="badge bg-info text-primary">Supported
+                                    Exchanges</a></div>
+                        </div>
                         <input class="form-control" list="exchangeOptions" id="exchange" name="exchange"
                             placeholder="Type to search...">
                         <datalist id="exchangeOptions">
-                            <option value="New York Stock Exchange">
-                            <option value="NASDAQ Stock Exchange">
-                            <option value="London Stock Exchange">
                         </datalist>
                     </div>
 
@@ -115,20 +113,18 @@
                         <input class="form-control" list="assetOptions" id="assetDataList" name="assetCode"
                             placeholder="Type to search...">
                         <datalist id="assetOptions">
-                            <option value="GOOG">
-                            <option value="TSLA">
-                            <option value="AAPL">
                         </datalist>
                     </div>
 
                     <div class="mb-3">
-                        <label for="exchange" class="form-label">Exchange</label>
+                        <div class="row">
+                            <div class="col"><label for="exchange" class="form-label">Exchange</label></div>
+                            <div class="col text-end"><a href="/exchanges" class="badge bg-info text-primary">Supported
+                                    Exchanges</a></div>
+                        </div>
                         <input class="form-control" list="exchangeOptions" id="exchange" name="exchange"
                             placeholder="Type to search...">
                         <datalist id="exchangeOptions">
-                            <option value="New York Stock Exchange">
-                            <option value="NASDAQ Stock Exchange">
-                            <option value="London Stock Exchange">
                         </datalist>
                     </div>
 
@@ -200,9 +196,9 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card">
-            <div class="card-header">Stock Portfolio Performance</div>
+            <div class="card-header">Monthly Total Stock Investment</div>
             <div class="card-body">
-                <canvas id="stockPerformanceGraph"></canvas>
+                <canvas id="sumStockInvestments"></canvas>
             </div>
         </div>
     </div>
@@ -370,17 +366,55 @@
         });
     }
 
-    // Stock Performance Chart
-    const cty = document.getElementById('stockPerformanceGraph');
+    // Populating the asset code datalist
+    var assetCodes = {{ asset_codes | tojson | safe }};
+    var assetOptions = document.getElementById('assetOptions');
+
+    assetCodes.forEach(function (code) {
+        var optionElement = document.createElement('option');
+        optionElement.value = code;
+        assetOptions.appendChild(optionElement);
+    });
+
+    // Populating the exchanges datalist
+    var exchanges = {{ exchanges | tojson | safe }};
+    var exchangeOptions = document.getElementById('exchangeOptions');
+
+    exchanges.forEach(function (code) {
+        var exchangeOption = document.createElement('option');
+        exchangeOption.value = code;
+        exchangeOptions.appendChild(exchangeOption);
+    });
+
+    // 
+
+    var fiveMonthHistory = {{ five_month_history | tojson | safe }};
+
+    var convertedDictionary = {};
+
+    for (var key in fiveMonthHistory) {
+        if (fiveMonthHistory.hasOwnProperty(key)) {
+            var dateObj = new Date(key);
+            var month = dateObj.toLocaleString('en-US', { month: 'long' });
+            convertedDictionary[month] = fiveMonthHistory[key];
+        }
+    }
+
+    console.log(convertedDictionary);
+
+    var monthNames = Object.keys(convertedDictionary);
+    var monthValues = Object.values(convertedDictionary);
+
+    // Cryptocurrency Performance Chart
+    const cty = document.getElementById('sumStockInvestments');
     new Chart(cty, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: monthNames,
             datasets: [{
-                label: 'Stock Value',
-                data: [12, 19, -3, 5, 2, 3],
+                label: 'Sum of investments in USD',
+                data: monthValues,
                 fill: false,
-                borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
             }]
         },

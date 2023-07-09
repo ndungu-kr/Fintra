@@ -4,7 +4,7 @@ from website.views import views
 from . import db
 import decimal
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import redirect, render_template, request, flash, url_for
 from unicodedata import category
 
@@ -47,6 +47,10 @@ def cryptocurrency_wallet():
     ############### Compiling transactions for transactions table ###############
     user_transactions = compiling_transactions_table()
 
+    five_month_history = investment_history()
+
+    cryptocurrency_codes = get_cryptocurency_codes()
+
     return render_template(
         "cryptocurrency_wallet.html",
         user=current_user,
@@ -62,6 +66,8 @@ def cryptocurrency_wallet():
         buy_modal_errors=buy_modal_errors,
         sell_modal_errors=sell_modal_errors,
         user_asset_values=user_asset_values,
+        five_month_history=five_month_history,
+        cryptocurrency_codes=cryptocurrency_codes,
     )
 
 
@@ -263,6 +269,111 @@ def format_to_2dp_with_commas(value):
     return f"${value:,.2f}"
 
 
+def investment_history():
+    # getting the buy and sell transactions for the current user
+    user_buy_transactions = CryptocurrencyBuy.query.filter_by(
+        user_id=current_user.id
+    ).all()
+    user_sell_transactions = CryptocurrencySell.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    now = datetime.now()
+    one_month_ago = now - timedelta(days=30)
+    two_months_ago = now - timedelta(days=60)
+    three_months_ago = now - timedelta(days=90)
+    four_months_ago = now - timedelta(days=120)
+
+    investments_this_month = 0
+    investments_one_month_ago = 0
+    investments_two_months_ago = 0
+    investments_three_months_ago = 0
+    investments_four_months_ago = 0
+
+    if user_buy_transactions is not None:
+        for transaction in user_buy_transactions:
+            if (
+                transaction.date.month == now.month
+                and transaction.date.year == now.year
+            ):
+                investments_this_month += transaction.monetary_amount
+            elif (
+                transaction.date.month == one_month_ago.month
+                and transaction.date.year == one_month_ago.year
+            ):
+                investments_one_month_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == two_months_ago.month
+                and transaction.date.year == two_months_ago.year
+            ):
+                investments_two_months_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == three_months_ago.month
+                and transaction.date.year == three_months_ago.year
+            ):
+                investments_three_months_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == four_months_ago.month
+                and transaction.date.year == four_months_ago.year
+            ):
+                investments_four_months_ago += transaction.monetary_amount
+
+    if user_sell_transactions is not None:
+        for transaction in user_sell_transactions:
+            if (
+                transaction.date.month == now.month
+                and transaction.date.year == now.year
+            ):
+                investments_this_month -= transaction.monetary_amount
+            elif (
+                transaction.date.month == one_month_ago.month
+                and transaction.date.year == one_month_ago.year
+            ):
+                investments_one_month_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == two_months_ago.month
+                and transaction.date.year == two_months_ago.year
+            ):
+                investments_two_months_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == three_months_ago.month
+                and transaction.date.year == three_months_ago.year
+            ):
+                investments_three_months_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == four_months_ago.month
+                and transaction.date.year == four_months_ago.year
+            ):
+                investments_four_months_ago -= transaction.monetary_amount
+
+    # converting the decimal values to string
+    investments_this_month = str(round(investments_this_month, 2))
+    investments_one_month_ago = str(round(investments_one_month_ago, 2))
+    investments_two_months_ago = str(round(investments_two_months_ago, 2))
+    investments_three_months_ago = str(round(investments_three_months_ago, 2))
+    investments_four_months_ago = str(round(investments_four_months_ago, 2))
+
+    # putting the data into a dictionary with date in str form as the key and investment as the value
+
+    investment_history = {
+        now.strftime("%Y-%m-%d"): investments_this_month,
+        one_month_ago.strftime("%Y-%m-%d"): investments_one_month_ago,
+        two_months_ago.strftime("%Y-%m-%d"): investments_two_months_ago,
+        three_months_ago.strftime("%Y-%m-%d"): investments_three_months_ago,
+        four_months_ago.strftime("%Y-%m-%d"): investments_four_months_ago,
+    }
+
+    return investment_history
+
+
+def get_cryptocurency_codes():
+    cryptocurrencies = Cryptocurrency.query.all()
+    cryptocurrency_codes = []
+    for cryptocurrency in cryptocurrencies:
+        cryptocurrency_codes.append(cryptocurrency.code)
+    return cryptocurrency_codes
+
+
 @views.route("/submit-crypto-buy-modal", methods=["POST"])
 def submit_crypto_buy():
     code = request.form.get("cryptocurrency")
@@ -314,6 +425,10 @@ def submit_crypto_buy():
 
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
+
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:
@@ -406,6 +521,37 @@ def submit_crypto_sell():
 
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
+
+    if user_owns_crypto.quantity < cryptocurrency_amount:
+        modal_errors.append("You do not own enough of this asset for this transaction.")
+
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
+
+    # getting all crypto buys before the sell date
+    crypto_buys = CryptocurrencyBuy.query.filter(
+        CryptocurrencyBuy.date <= date,
+        CryptocurrencyBuy.user_id == current_user.id,
+        CryptocurrencyBuy.code == code,
+    ).all()
+    # getting all crypto sells before the sell date
+    crypto_sells = CryptocurrencySell.query.filter(
+        CryptocurrencySell.date <= date,
+        CryptocurrencySell.user_id == current_user.id,
+        CryptocurrencySell.code == code,
+    ).all()
+
+    # calculating the total amount of cryptocurrency held before the sell date
+    total_crypto = 0
+    for buy in crypto_buys:
+        total_crypto += buy.quantity
+    for sell in crypto_sells:
+        total_crypto -= sell.quantity
+
+    # checking the user owned enough cryptocurrency before the sell date
+    if total_crypto < cryptocurrency_amount:
+        modal_errors.append("You did not own enough of this asset on this date.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:

@@ -4,7 +4,7 @@ from website.views import views
 from . import db
 import decimal
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import redirect, render_template, request, flash, url_for
 from unicodedata import category
 
@@ -52,6 +52,10 @@ def forex_wallet():
     ############### Compiling transactions for transactions table ###############
     user_transactions = compiling_transactions_table()
 
+    five_month_history = investment_history()
+
+    asset_codes = get_asset_codes()
+
     return render_template(
         "forex_wallet.html",
         user=current_user,
@@ -67,6 +71,8 @@ def forex_wallet():
         user_transactions=user_transactions,
         buy_modal_errors=buy_modal_errors,
         sell_modal_errors=sell_modal_errors,
+        five_month_history=five_month_history,
+        asset_codes=asset_codes,
     )
 
 
@@ -273,57 +279,123 @@ def format_to_2dp_with_commas(value):
     return f"${value:,.2f}"
 
 
+def investment_history():
+    # getting the buy and sell transactions for the current user
+    user_buy_transactions = holdingBuy.query.filter_by(user_id=current_user.id).all()
+    user_sell_transactions = holdingSell.query.filter_by(user_id=current_user.id).all()
+
+    now = datetime.now()
+    one_month_ago = now - timedelta(days=30)
+    two_months_ago = now - timedelta(days=60)
+    three_months_ago = now - timedelta(days=90)
+    four_months_ago = now - timedelta(days=120)
+
+    investments_this_month = 0
+    investments_one_month_ago = 0
+    investments_two_months_ago = 0
+    investments_three_months_ago = 0
+    investments_four_months_ago = 0
+
+    if user_buy_transactions is not None:
+        for transaction in user_buy_transactions:
+            if (
+                transaction.date.month == now.month
+                and transaction.date.year == now.year
+            ):
+                investments_this_month += transaction.monetary_amount
+            elif (
+                transaction.date.month == one_month_ago.month
+                and transaction.date.year == one_month_ago.year
+            ):
+                investments_one_month_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == two_months_ago.month
+                and transaction.date.year == two_months_ago.year
+            ):
+                investments_two_months_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == three_months_ago.month
+                and transaction.date.year == three_months_ago.year
+            ):
+                investments_three_months_ago += transaction.monetary_amount
+            elif (
+                transaction.date.month == four_months_ago.month
+                and transaction.date.year == four_months_ago.year
+            ):
+                investments_four_months_ago += transaction.monetary_amount
+
+    if user_sell_transactions is not None:
+        for transaction in user_sell_transactions:
+            if (
+                transaction.date.month == now.month
+                and transaction.date.year == now.year
+            ):
+                investments_this_month -= transaction.monetary_amount
+            elif (
+                transaction.date.month == one_month_ago.month
+                and transaction.date.year == one_month_ago.year
+            ):
+                investments_one_month_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == two_months_ago.month
+                and transaction.date.year == two_months_ago.year
+            ):
+                investments_two_months_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == three_months_ago.month
+                and transaction.date.year == three_months_ago.year
+            ):
+                investments_three_months_ago -= transaction.monetary_amount
+            elif (
+                transaction.date.month == four_months_ago.month
+                and transaction.date.year == four_months_ago.year
+            ):
+                investments_four_months_ago -= transaction.monetary_amount
+
+    # converting the decimal values to string
+    investments_this_month = str(round(investments_this_month, 2))
+    investments_one_month_ago = str(round(investments_one_month_ago, 2))
+    investments_two_months_ago = str(round(investments_two_months_ago, 2))
+    investments_three_months_ago = str(round(investments_three_months_ago, 2))
+    investments_four_months_ago = str(round(investments_four_months_ago, 2))
+
+    # putting the data into a dictionary with date in str form as the key and investment as the value
+
+    investment_history = {
+        now.strftime("%Y-%m-%d"): investments_this_month,
+        one_month_ago.strftime("%Y-%m-%d"): investments_one_month_ago,
+        two_months_ago.strftime("%Y-%m-%d"): investments_two_months_ago,
+        three_months_ago.strftime("%Y-%m-%d"): investments_three_months_ago,
+        four_months_ago.strftime("%Y-%m-%d"): investments_four_months_ago,
+    }
+
+    return investment_history
+
+
+def get_asset_codes():
+    assets = holding.query.all()
+    asset_codes = []
+    for asset in assets:
+        asset_codes.append(asset.code)
+    return asset_codes
+
+
 @views.route("/submit-forex-buy-modal", methods=["POST"])
 def submit_forex_buy():
     modal_errors = []
 
     # check that inputs were entered and if so return them
-    asset_code, asset_amount, monetary_amount, date, description = check_for_buy_inputs(
-        modal_errors
-    )
-
-    # check that inputs are valid
-    check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_code)
-
-    # adding transaction to buy asset
-    add_to_asset_buy = holdingBuy(
-        code=asset_code,
-        user_id=current_user.id,
-        quantity=asset_amount,
-        monetary_amount=monetary_amount,
-        description=description,
-        date=date,
-    )
-    db.session.add(add_to_asset_buy)
-
-    # updating the asset amounts table if the user already owns the asset
-    user_owns_asset = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-    if user_owns_asset is None:
-        add_to_asset_amounts = holdingAmount(
-            code=asset_code,
-            quantity=asset_amount,
-            user_id=current_user.id,
-        )
-        db.session.add(add_to_asset_amounts)
-    else:
-        user_owns_asset.quantity += asset_amount
-
-    db.session.commit()
-
-    flash("Forex asset successfully purchased.", category="success")
-    return redirect(url_for("views.forex_wallet"))
-
-
-def check_for_buy_inputs(modal_errors):
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
 
+    asset_code_exists = holding.query.filter_by(code=asset_code).first()
+
     # checking that a forex code was entered
     if len(asset_code) == 0:
         modal_errors.append("Please select a forex asset.")
+    elif asset_code_exists is None:
+        modal_errors.append("Please enter a valid forex asset code.")
 
     # checking that a asset amount was entered
     try:
@@ -352,10 +424,6 @@ def check_for_buy_inputs(modal_errors):
             url_for("views.forex_wallet", buy_modal_errors=buy_modal_errors)
         )
 
-    return asset_code, asset_amount, monetary_amount, date, description
-
-
-def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_code):
     # checking that a valid asset amount was entered
     if asset_amount == 0 or asset_amount < 0 or asset_amount is None:
         modal_errors.append("Please enter a valid asset amount.")
@@ -364,11 +432,9 @@ def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
 
-    asset_code_exists = holding.query.filter_by(code=asset_code).first()
-
-    # checking that the forex asset code is exists in db
-    if asset_code_exists is None:
-        modal_errors.append("Please enter a valid forex asset code.")
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
 
     # confirming that the inputs are valid
     if len(modal_errors) > 0:
@@ -378,6 +444,36 @@ def check_buy_input_validity(modal_errors, asset_amount, monetary_amount, asset_
         return redirect(
             url_for("views.forex_wallet", buy_modal_errors=buy_modal_errors)
         )
+    else:
+        # adding transaction to buy asset
+        add_to_asset_buy = holdingBuy(
+            code=asset_code,
+            user_id=current_user.id,
+            quantity=asset_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=date,
+        )
+        db.session.add(add_to_asset_buy)
+
+        # updating the asset amounts table if the user already owns the asset
+        user_owns_asset = holdingAmount.query.filter_by(
+            code=asset_code, user_id=current_user.id
+        ).first()
+        if user_owns_asset is None:
+            add_to_asset_amounts = holdingAmount(
+                code=asset_code,
+                quantity=asset_amount,
+                user_id=current_user.id,
+            )
+            db.session.add(add_to_asset_amounts)
+        else:
+            user_owns_asset.quantity += asset_amount
+
+        db.session.commit()
+
+        flash("Forex asset successfully purchased.", category="success")
+        return redirect(url_for("views.forex_wallet"))
 
 
 @views.route("/submit-forex-sell-modal", methods=["POST"])
@@ -385,51 +481,18 @@ def submit_forex_sell():
     modal_errors = []
 
     # check that inputs were entered and if so return them
-    (
-        asset_code,
-        asset_amount,
-        monetary_amount,
-        date,
-        description,
-    ) = check_for_sell_inputs(modal_errors)
-
-    # check that inputs are valid
-    check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_amount)
-
-    # adding transaction to sell asset sell
-    add_to_asset_sell = holdingSell(
-        code=asset_code,
-        user_id=current_user.id,
-        quantity=asset_amount,
-        monetary_amount=monetary_amount,
-        description=description,
-        date=date,
-    )
-    db.session.add(add_to_asset_sell)
-
-    # updating the asset amounts table
-    user_asset_amount = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-    user_asset_amount.quantity -= asset_amount
-
-    # if the user has sold all of their asset, delete the row from the table
-    if user_asset_amount.quantity == 0:
-        db.session.delete(user_asset_amount)
-
-    db.session.commit()
-
-    flash("Forex asset successfully sold.", category="success")
-    return redirect(url_for("views.forex_wallet"))
-
-
-def check_for_sell_inputs(modal_errors):
     asset_code = request.form.get("assetCode")
     date_input = request.form.get("transactionDate")
     description = request.form.get("description")
 
+    user_owns_asset = holdingAmount.query.filter_by(
+        code=asset_code, user_id=current_user.id
+    ).first()
+
     if len(asset_code) == 0:
         modal_errors.append("Please select a forex asset.")
+    elif user_owns_asset is None:
+        modal_errors.append("You do not own this forex asset.")
 
     try:
         asset_amount = decimal.Decimal(request.form.get("assetAmount"))
@@ -455,23 +518,43 @@ def check_for_sell_inputs(modal_errors):
             url_for("views.forex_wallet", sell_modal_errors=sell_modal_errors)
         )
 
-    return asset_code, asset_amount, monetary_amount, date, description
-
-
-def check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_amount):
-    user_owns_asset = holdingAmount.query.filter_by(
-        code=asset_code, user_id=current_user.id
-    ).first()
-
-    if user_owns_asset is None:
-        modal_errors.append("You do not own this forex asset.")
-
     # checking that the inputs made are valid
     if asset_amount == 0 or asset_amount < 0 or asset_amount is None:
         modal_errors.append("Please enter a valid forex asset amount.")
 
     if monetary_amount == 0 or monetary_amount < 0 or monetary_amount is None:
         modal_errors.append("Please enter a valid monetary value.")
+
+    if user_owns_asset.quantity < asset_amount:
+        modal_errors.append("You do not own enough of this asset for this transaction.")
+
+    now = datetime.now()
+    if date > now:
+        modal_errors.append("You cannot enter a future date.")
+
+    # getting all crypto buys before the sell date
+    asset_buys = holdingBuy.query.filter(
+        holdingBuy.date <= date,
+        holdingBuy.user_id == current_user.id,
+        holdingBuy.code == asset_code,
+    ).all()
+    # getting all crypto sells before the sell date
+    asset_sells = holdingSell.query.filter(
+        holdingSell.date <= date,
+        holdingSell.user_id == current_user.id,
+        holdingSell.code == asset_code,
+    ).all()
+
+    # calculating the total amount of cryptocurrency held before the sell date
+    total_asset = 0
+    for buy in asset_buys:
+        total_asset += buy.quantity
+    for sell in asset_sells:
+        total_asset -= sell.quantity
+
+    # checking the user owned enough cryptocurrency before the sell date
+    if total_asset < asset_amount:
+        modal_errors.append("You did not own enough of this asset on this date.")
 
     if len(modal_errors) > 0:
         for error in modal_errors:
@@ -480,3 +563,29 @@ def check_sell_input_validity(asset_code, modal_errors, asset_amount, monetary_a
         return redirect(
             url_for("views.forex_wallet", sell_modal_errors=sell_modal_errors)
         )
+    else:
+        # adding transaction to sell asset sell
+        add_to_asset_sell = holdingSell(
+            code=asset_code,
+            user_id=current_user.id,
+            quantity=asset_amount,
+            monetary_amount=monetary_amount,
+            description=description,
+            date=date,
+        )
+        db.session.add(add_to_asset_sell)
+
+        # updating the asset amounts table
+        user_asset_amount = holdingAmount.query.filter_by(
+            code=asset_code, user_id=current_user.id
+        ).first()
+        user_asset_amount.quantity -= asset_amount
+
+        # if the user has sold all of their asset, delete the row from the table
+        if user_asset_amount.quantity == 0:
+            db.session.delete(user_asset_amount)
+
+        db.session.commit()
+
+        flash("Forex asset successfully sold.", category="success")
+        return redirect(url_for("views.forex_wallet"))

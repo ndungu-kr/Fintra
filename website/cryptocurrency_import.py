@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 import requests
 from os import path, getcwd
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import csv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,24 +23,28 @@ def crypto_import():
     # Creating a list of dictionaries containing the cryptocurrency data
     cryptos = []
     for crypto in data["data"]:
-        timestamp_str = crypto["last_updated"]
-        timestamp = datetime.strptime(
-            timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ"
-        ).isoformat()
+        # timestamp_str = crypto["last_updated"]
+        # timestamp = datetime.strptime(
+        #     timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ"
+        # ).isoformat()
         cryptos.append(
             {
                 "code": crypto["symbol"],
                 "name": crypto["name"],
                 "current_price": f"${crypto['quote']['USD']['price']}",
-                "last_updated": timestamp,
+                "market_cap": crypto["quote"]["USD"]["market_cap"],
+                "ciurculating_supply": crypto["circulating_supply"],
+                "total_supply": crypto["total_supply"],
+                "max_supply": crypto["max_supply"],
+                "last_updated": crypto["last_updated"],
             }
         )
 
     # Writing the cryptocurrency data to the database
     crypto_data_to_db(cryptos)
 
-    # Writing the cryptocurrency data onto a CSV file
-    create_crypto_csv(cryptos)
+    # # Writing the cryptocurrency data onto a CSV file
+    # create_crypto_csv(cryptos)
 
 
 def crypto_data_to_db(cryptos):
@@ -60,11 +64,22 @@ def crypto_data_to_db(cryptos):
             code = crypto["code"]
             name = crypto["name"]
             current_price = crypto["current_price"]
+            market_cap = crypto["market_cap"]
+            circulating_supply = crypto["ciurculating_supply"]
+
+            total_supply = crypto["total_supply"]
+            if total_supply is None or total_supply == 0:
+                total_supply = circulating_supply
+
+            max_supply = crypto["max_supply"]
+            if max_supply is None or max_supply == 0:
+                max_supply = total_supply
+
             last_updated = crypto["last_updated"]
 
             # converting current_price and last_updated to correct format
             current_price = float(current_price.strip("$"))
-            last_updated = datetime.strptime(last_updated, "%Y-%m-%dT%H:%M:%S")
+            last_updated = datetime.strptime(last_updated, "%Y-%m-%dT%H:%M:%S.%fZ")
 
             Session = sessionmaker(bind=engine)
             with Session() as session:
@@ -77,6 +92,10 @@ def crypto_data_to_db(cryptos):
                 if crypto_code_exists and crypto_name_exists:
                     crypto_code_exists.price = current_price
                     crypto_code_exists.last_updated = last_updated
+                    crypto_code_exists.market_cap = market_cap
+                    crypto_code_exists.circulating_supply = circulating_supply
+                    crypto_code_exists.total_supply = total_supply
+                    crypto_code_exists.max_supply = max_supply
                     updated_counter = updated_counter + 1
                     session.commit()
                 else:
@@ -84,6 +103,10 @@ def crypto_data_to_db(cryptos):
                         code=code,
                         name=name,
                         current_price=current_price,
+                        market_cap=market_cap,
+                        circulating_supply=circulating_supply,
+                        total_supply=total_supply,
+                        max_supply=max_supply,
                         last_updated=last_updated,
                     )
                     session.add(new_query)
@@ -111,27 +134,42 @@ def crypto_data_to_db(cryptos):
     update_last_updated(asset)
 
 
-def create_crypto_csv(cryptos):
-    # Acessing crypto file
-    crypto_folder = "crypto_data"
-    cwd = path.abspath(getcwd())
-    crypto_folder_path = path.join(cwd, "website", crypto_folder)
+# def create_crypto_csv(cryptos):
+#     # Acessing crypto file
+#     crypto_folder = "crypto_data"
+#     cwd = path.abspath(getcwd())
+#     crypto_folder_path = path.join(cwd, "website", crypto_folder)
 
-    current_time = datetime.now(timezone.utc)
+#     current_time = datetime.now(timezone.utc)
 
-    # Removing milliseconds from time for naming csv
-    formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
-    filename = f"top_cryptocurrencies {formatted_time}.csv"
+#     # Removing milliseconds from time for naming csv
+#     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
+#     filename = f"top_cryptocurrencies {formatted_time}.csv"
 
-    # setting csv save location
-    file_path = path.join(crypto_folder_path, filename)
+#     # setting csv save location
+#     file_path = path.join(crypto_folder_path, filename)
 
-    with open(file_path, "w", newline="") as csvfile:
-        fieldnames = ["code", "name", "current_price", "last_updated"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#     with open(file_path, "w", newline="") as csvfile:
+#         fieldnames = [
+#             "code",
+#             "name",
+#             "current_price",
+#             "market_cap",
+#             "circulating_supply",
+#             "total_supply",
+#             "max_supply",
+#             "last_updated",
+#         ]
+#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writeheader()
-        for crypto in cryptos:
-            writer.writerow(crypto)
+#         writer.writeheader()
+#         for crypto in cryptos:
+#             # sometimes some of the fieldnames are not present in the data
+#             # however this does not code work at the moment
+#             clean_crypto = {
+#                 key: crypto[key] if crypto[key] is not None else ""
+#                 for key in fieldnames
+#             }
+#             writer.writerow(clean_crypto)
 
-        print("###### Cryptocurrency CSV created successfully ######")
+#         print("###### Cryptocurrency CSV created successfully ######")

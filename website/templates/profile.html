@@ -1,0 +1,173 @@
+{% extends "base.html"%}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<div class="row mb-2">
+    <div class="col-sm-8 fs-2 fw-bold mb-1 justify-content-start">Hello {{ user.first_name }}</div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <!-- <a class="btn btn-primary fs-5 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency" role="button">Buy</a> -->
+        <button id="openProfileModal" class="btn btn-primary fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#editProfile">Edit Profile</button>
+    </div>
+    <div class="col-sm-2 d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+        <!-- <a class="btn btn-primary fs-5 w-100" href="/cryptocurrency-wallet/buy-cryptocurrency" role="button">Buy</a> -->
+        <button id="openGoalsModal" class="btn btn-success fs-5 w-100" type="button" data-bs-toggle="modal"
+            data-bs-target="#editGoals">Set Goals</button>
+    </div>
+</div>
+
+<div class="modal fade" id="editProfile" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/edit-profile" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editProfileLabel">Edit Profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if profile_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in profile_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input class="form-control" id="email" name="email" placeholder="john@email.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editGoals" tabindex="-1" aria-labelledby="editGoalsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/edit-goals" method="POST">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editGoalsLabel">Edit Goals</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if goal_modal_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in goal_modal_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="alert alert-info">
+                        <ul>
+                            <li>Asset goals are optional</li>
+                            <li>Asset goals must add up to your monthly goal</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthlyGoal" class="form-label">Monthly Goal</label>
+                        <input class="form-control" id="monthlyGoal" name="monthly_goal" placeholder="i.e. 1500">
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthlyCryptoGoal" class="form-label">Cryptocurrency Goal (optional)</label>
+                        <input class="form-control" id="monthlyCryptoGoal" name="crypto_goal" placeholder="i.e. 500">
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthlyForexGoal" class="form-label">Forex Goal (optional)</label>
+                        <input class="form-control" id="monthlyForexGoal" name="forex_goal" placeholder="i.e. 500">
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthlyStockGoal" class="form-label">Stock Goal (optional)</label>
+                        <input class="form-control" id="monthlyStockGoal" name="stock_goal" placeholder="i.e. 500">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Email</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ user.email }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Monthly Overall Goal</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ latest_user_goal.monthly_goal if latest_user_goal }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Monthly Cryptocurrency Goal</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ latest_user_goal.crypto_goal if latest_user_goal }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Monthly Forex Goal</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ latest_user_goal.forex_goal if latest_user_goal }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-header">Monthly Stock Goal</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ latest_user_goal.stock_goal if latest_user_goal }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var goalModalErrors = JSON.parse('{{ goal_modal_errors | default("[]") | tojson | safe }}');
+    if (Array.isArray(goalModalErrors) && goalModalErrors.length > 0) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var goalsModalButton = document.getElementById('openGoalsModal');
+            goalsModalButton.click();
+        });
+    }
+</script>
+
+{% endblock %}

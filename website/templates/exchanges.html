@@ -1,0 +1,36 @@
+{% extends "base.html"%}
+{% block title %}Supported Stock Exchanges{% endblock %}
+
+{% block content %}
+
+<div class="row mb-2">
+    <div class="col-sm-12 fs-2 fw-bold mb-1 justify-content-start">Supported Stock Exchanges</div>
+    <p> Below is a list of the exchanges supported on the website, sorted in alphabetical order of the exchange's
+        operating country
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Exchange</th>
+                        <th scope="col">Country</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exchange in exchanges %}
+                    <tr>
+                        <td>{{ exchange.name }}</td>
+                        <td>{{ exchange.country }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

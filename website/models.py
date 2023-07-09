@@ -2,9 +2,10 @@ from email.policy import default
 from enum import unique
 from . import db
 from flask_login import UserMixin
-from sqlalchemy.sql import func
 from sqlalchemy.orm import backref
 from datetime import datetime
+
+# from sqlalchemy.sql import func
 
 
 class User(db.Model, UserMixin):
@@ -15,6 +16,16 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User('{self.first_name}', '{self.email}')"
+
+
+class Goals(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    monthly_goal = db.Column(db.DECIMAL, nullable=False, default=0)
+    crypto_goal = db.Column(db.DECIMAL, nullable=False, default=0)
+    forex_goal = db.Column(db.DECIMAL, nullable=False, default=0)
+    stock_goal = db.Column(db.DECIMAL, nullable=False, default=0)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
 class CryptocurrencyBuy(db.Model):
@@ -100,6 +111,10 @@ class Cryptocurrency(db.Model):
     code = db.Column(db.String(5), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     current_price = db.Column(db.DECIMAL, nullable=False, default=0)
+    market_cap = db.Column(db.DECIMAL, nullable=False, default=0)
+    circulating_supply = db.Column(db.DECIMAL, nullable=False, default=0)
+    total_supply = db.Column(db.DECIMAL, nullable=False, default=0)
+    max_supply = db.Column(db.DECIMAL, nullable=False, default=0)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     crytocurrency_purchased = db.relationship(
         "CryptocurrencyBuy", backref="crytocurrency_purchased", lazy=True
