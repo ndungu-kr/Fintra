@@ -529,6 +529,30 @@ def submit_crypto_sell():
     if date > now:
         modal_errors.append("You cannot enter a future date.")
 
+    # getting all crypto buys before the sell date
+    crypto_buys = CryptocurrencyBuy.query.filter(
+        CryptocurrencyBuy.date <= date,
+        CryptocurrencyBuy.user_id == current_user.id,
+        CryptocurrencyBuy.code == code,
+    ).all()
+    # getting all crypto sells before the sell date
+    crypto_sells = CryptocurrencySell.query.filter(
+        CryptocurrencySell.date <= date,
+        CryptocurrencySell.user_id == current_user.id,
+        CryptocurrencySell.code == code,
+    ).all()
+
+    # calculating the total amount of cryptocurrency held before the sell date
+    total_crypto = 0
+    for buy in crypto_buys:
+        total_crypto += buy.quantity
+    for sell in crypto_sells:
+        total_crypto -= sell.quantity
+
+    # checking the user owned enough cryptocurrency before the sell date
+    if total_crypto < cryptocurrency_amount:
+        modal_errors.append("You did not own enough of this asset on this date.")
+
     if len(modal_errors) > 0:
         for error in modal_errors:
             flash(error, category="modal_error")
