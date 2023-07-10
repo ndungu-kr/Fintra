@@ -1,0 +1,41 @@
+{% extends "base.html"%}
+{% block title %}Stocks{% endblock %}
+
+{% block content %}
+
+<div class="row mb-2">
+    <div class="col-sm-12 fs-2 fw-bold mb-1 justify-content-start">Stocks in Database</div>
+    <p> Below is a list of the stocks in our database, sorted in alphabetical order of the stock's ticker symbol</p>
+    <p> The list is set to change based on user's input.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Ticker</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Exchange</th>
+                        <th scope="col">USD Price</th>
+                        <th scope="col">Price Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    <tr>
+                        <td>{{ stock.ticker }}</td>
+                        <td>{{ stock.name }}</td>
+                        <td>{{ stock.exchange_name }}</td>
+                        <td>{{ stock.formatted_price }}</td>
+                        <td>{{ stock.price_date_only }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
