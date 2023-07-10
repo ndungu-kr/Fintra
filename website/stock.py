@@ -16,6 +16,7 @@ from website.models import (
     StockAmount,
     StockBuy,
     StockSell,
+    Goals,
 )
 
 
@@ -53,6 +54,7 @@ def stock_wallet():
 
     asset_codes = get_asset_codes()
     exchanges = get_exchanges()
+    goal_history = get_goal_history()
 
     return render_template(
         "stock_wallet.html",
@@ -72,6 +74,7 @@ def stock_wallet():
         five_month_history=five_month_history,
         asset_codes=asset_codes,
         exchanges=exchanges,
+        goal_history=goal_history,
     )
 
 
@@ -382,6 +385,93 @@ def investment_history():
     }
 
     return investment_history
+
+
+def get_goal_history():
+    all_goal_history = Goals.query.filter_by(user_id=current_user.id).all()
+
+    # arrange all_goal_history in descending order of date so that the most recent goal appears first
+    all_goal_history.sort(key=lambda x: x.date, reverse=True)
+
+    now = datetime.now()
+    one_month_ago = now - timedelta(days=30)
+    two_months_ago = now - timedelta(days=60)
+    three_months_ago = now - timedelta(days=90)
+    four_months_ago = now - timedelta(days=120)
+
+    if all_goal_history:
+        for goal in all_goal_history:
+            # if the month of the date of the goal is the same as the month of 4 months ago
+            if (
+                goal.date.month == four_months_ago.month
+                and goal.date.year == four_months_ago.year
+            ):
+                # use the goal amount as the goal for 4 months ago
+                goal_four_months_ago = goal.stock_goal
+                break
+            # if there is no goal for 4 months ago
+            elif goal.date < four_months_ago:
+                # use the next goal as the goal for 4 months ago
+                goal_four_months_ago = goal.stock_goal
+            else:
+                # otherwise, there is no goal for 4 months ago
+                goal_four_months_ago = 0
+
+        for goal in all_goal_history:
+            if (
+                goal.date.month == three_months_ago.month
+                and goal.date.year == three_months_ago.year
+            ):
+                goal_three_months_ago = goal.stock_goal
+                break
+            else:
+                goal_three_months_ago = goal_four_months_ago
+
+        for goal in all_goal_history:
+            if (
+                goal.date.month == two_months_ago.month
+                and goal.date.year == two_months_ago.year
+            ):
+                goal_two_months_ago = goal.stock_goal
+                break
+            else:
+                goal_two_months_ago = goal_three_months_ago
+
+        for goal in all_goal_history:
+            if (
+                goal.date.month == one_month_ago.month
+                and goal.date.year == one_month_ago.year
+            ):
+                goal_one_month_ago = goal.stock_goal
+                break
+            else:
+                goal_one_month_ago = goal_two_months_ago
+
+        for goal in all_goal_history:
+            if goal.date.month == now.month and goal.date.year == now.year:
+                goal_this_month = goal.stock_goal
+                break
+            else:
+                goal_this_month = goal_one_month_ago
+
+        goal_history = {
+            now.strftime("%Y-%m-%d"): goal_this_month,
+            one_month_ago.strftime("%Y-%m-%d"): goal_one_month_ago,
+            two_months_ago.strftime("%Y-%m-%d"): goal_two_months_ago,
+            three_months_ago.strftime("%Y-%m-%d"): goal_three_months_ago,
+            four_months_ago.strftime("%Y-%m-%d"): goal_four_months_ago,
+        }
+
+    else:
+        goal_history = {
+            now.strftime("%Y-%m-%d"): 0,
+            one_month_ago.strftime("%Y-%m-%d"): 0,
+            two_months_ago.strftime("%Y-%m-%d"): 0,
+            three_months_ago.strftime("%Y-%m-%d"): 0,
+            four_months_ago.strftime("%Y-%m-%d"): 0,
+        }
+
+    return goal_history
 
 
 @views.route("/submit-stock-buy-modal", methods=["POST"])
