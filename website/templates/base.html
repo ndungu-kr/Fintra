@@ -142,14 +142,32 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/exchanges" class="nav-link px-3 active">
-                            <span class="me-2">
-                                <i class="bi bi-bank"></i>
-                            </span>
-                            <span>
-                                Exchanges
-                            </span>
+                        <a class="nav-link px-3 sidebar-link active" data-bs-toggle="collapse" href="#stocksCollapse"
+                            role="button" aria-expanded="false" aria-controls="stocksCollapse">
+                            <span class="me-2"><i class="bi bi-bank"></i></span>
+                            <span>Stocks</span>
+                            <span class="right-icon ms-auto"><i class="bi bi-chevron-down"></i></span>
                         </a>
+                        <div class="collapse" id="stocksCollapse">
+                            <div>
+                                <ul class="navbar-nav ps-3">
+                                    <li>
+                                        <a href="/exchanges" class="nav-link px-3 active">
+                                            <span>
+                                                Exchanges
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/stocks" class="nav-link px-3 active">
+                                            <span>
+                                                Stocks
+                                            </span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </nav>
