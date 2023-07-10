@@ -172,7 +172,7 @@
 <div class="row">
     <div class="col-md-12 mb-3">
         <div class="card">
-            <div class="card-header">Monthly Total Forex Investment</div>
+            <div class="card-header">Forex Investment vs Investment Goals</div>
             <div class="card-body">
                 <canvas id="sumForexInvestments"></canvas>
             </div>
@@ -352,7 +352,7 @@
         assetOptions.appendChild(optionElement);
     });
 
-    // 
+    // Investment Goals
 
     var fiveMonthHistory = {{ five_month_history | tojson | safe }};
 
@@ -366,7 +366,8 @@
         }
     }
 
-    console.log(convertedDictionary);
+    var goalHistory = {{ goal_history | tojson | safe }};
+    var goalHistoryValues = Object.values(goalHistory);
 
     var monthNames = Object.keys(convertedDictionary);
     var monthValues = Object.values(convertedDictionary);
@@ -377,12 +378,20 @@
         type: 'line',
         data: {
             labels: monthNames,
-            datasets: [{
-                label: 'Sum of investments in USD',
-                data: monthValues,
-                fill: false,
-                tension: 0.1
-            }]
+            datasets: [
+                {
+                    label: 'Investments and withdrawals aggregate',
+                    data: monthValues,
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'Investment goals',
+                    data: goalHistoryValues,
+                    fill: false,
+                    tension: 0.1
+                }
+            ]
         },
     });
 
