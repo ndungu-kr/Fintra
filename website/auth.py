@@ -45,7 +45,7 @@ def sign_up():
         user = User.query.filter_by(email=email).first()
 
         if user:
-            flash("Email already exists.", category="error")
+            flash("Email already exists, please log in.", category="error")
         if len(email) < 4:
             flash("Email must be greater than 4 characters", category="error")
         elif len(first_name) < 2:
@@ -53,7 +53,10 @@ def sign_up():
         elif password1 != password2:
             flash("Passwords do not match", category="error")
         elif len(password1) < 7:
-            flash("Password must be at least 7 characters", category="error")
+            flash(
+                "Password must be at least 7 characters long, include 1 special character, 1 capital letter and one number",
+                category="error",
+            )
         else:
             # creating a new user
             new_user = User(
