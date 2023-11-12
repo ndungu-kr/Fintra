@@ -1,6 +1,6 @@
 *.pyc
 .env
 .venv
+Database
 yfinance.cache
-instance/
 ```      

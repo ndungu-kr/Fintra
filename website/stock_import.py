@@ -28,7 +28,7 @@ yf.session = session
 class DbSession:
     def __init__(self):
         try:
-            engine = create_engine("sqlite:///./instance/database.db")
+            engine = create_engine("sqlite:///./Database/database.db")
             self.dbSession = sessionmaker(bind=engine)
         except OperationalError as e:
             print(f"Error connecting to the database: {e}")
