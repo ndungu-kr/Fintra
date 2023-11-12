@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime, timedelta, timezone
-from os import getcwd, listdir, path
+from os import getcwd, listdir, path, getenv
 import os
 from sqlite3 import OperationalError
 from sqlalchemy.orm import sessionmaker
@@ -97,10 +97,8 @@ def get_currency_pairs():
 
 
 def currency_import():
-    api_key = "2a398dea570d408aa9058f71145957a9"
-
     # Building the API request URL with base currency as USD
-    url = f"https://openexchangerates.org/api/latest.json?app_id={api_key}&show_alternative=1"
+    url = f"https://openexchangerates.org/api/latest.json?app_id={getenv('oer_api_key')}&show_alternative=1"
     response = requests.get(url)
 
     # Parse the response JSON
