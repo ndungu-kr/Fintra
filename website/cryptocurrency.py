@@ -21,14 +21,14 @@ from website.models import (
 @views.route("/cryptocurrency-wallet", methods=["GET", "POST"])
 @login_required
 def cryptocurrency_wallet():
-    ############### modal errors ###############
+    # Modal errors 
     buy_modal_errors, sell_modal_errors = modal_errors()
 
-    ############### Getting cryptocurrency asset totals for the user ###############
+    # Getting cryptocurrency asset totals for the user 
     user_assets, user_asset_values, asset_balance = calc_asset_totals()
     total_asset_balance = format_to_2dp_with_commas(asset_balance)
 
-    ############### Calculating total asset profit ###############
+    # Calculating total asset profit
     (
         total_asset_profit,
         total_asset_profit_percentage,
@@ -39,13 +39,13 @@ def cryptocurrency_wallet():
     total_invested = format_to_2dp_with_commas(total_invested)
     total_withdrawn = format_to_2dp_with_commas(total_withdrawn)
 
-    ############### Getting the users monthly breakdown ###############
+    # Getting the users monthly breakdown
     total_invested_this_month, total_sold_this_month = calc_monthly_breakdown()
     # Formatting values
     total_invested_this_month = format_to_2dp_with_commas(total_invested_this_month)
     total_sold_this_month = format_to_2dp_with_commas(total_sold_this_month)
 
-    ############### Compiling transactions for transactions table ###############
+    # Compiling transactions for transactions table 
     user_transactions = compiling_transactions_table()
 
     five_month_history = investment_history()
@@ -175,7 +175,7 @@ def calc_total_profits():
     total_crypto_spend = 0
     value_of_remaining_assets = 0
     asset_quantities = {}
-    # then we calculate the total spent
+    # calculate the total spent
     for buy_tranz in user_buy_transactions:
         total_crypto_spend += buy_tranz.monetary_amount
         total_invested += buy_tranz.monetary_amount

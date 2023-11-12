@@ -23,10 +23,6 @@ def crypto_import():
     # Creating a list of dictionaries containing the cryptocurrency data
     cryptos = []
     for crypto in data["data"]:
-        # timestamp_str = crypto["last_updated"]
-        # timestamp = datetime.strptime(
-        #     timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ"
-        # ).isoformat()
         cryptos.append(
             {
                 "code": crypto["symbol"],
@@ -43,9 +39,6 @@ def crypto_import():
     # Writing the cryptocurrency data to the database
     crypto_data_to_db(cryptos)
 
-    # # Writing the cryptocurrency data onto a CSV file
-    # create_crypto_csv(cryptos)
-
 
 def crypto_data_to_db(cryptos):
     from website.models import Cryptocurrency
@@ -53,7 +46,6 @@ def crypto_data_to_db(cryptos):
     try:
         engine = create_engine("sqlite:///./instance/database.db")
         Session = sessionmaker(bind=engine)
-        # session = Session()
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 
@@ -132,44 +124,3 @@ def crypto_data_to_db(cryptos):
 
     asset = "cryptocurrency"
     update_last_updated(asset)
-
-
-# def create_crypto_csv(cryptos):
-#     # Acessing crypto file
-#     crypto_folder = "crypto_data"
-#     cwd = path.abspath(getcwd())
-#     crypto_folder_path = path.join(cwd, "website", crypto_folder)
-
-#     current_time = datetime.now(timezone.utc)
-
-#     # Removing milliseconds from time for naming csv
-#     formatted_time = current_time.strftime("%Y-%m-%d %H%M%S")
-#     filename = f"top_cryptocurrencies {formatted_time}.csv"
-
-#     # setting csv save location
-#     file_path = path.join(crypto_folder_path, filename)
-
-#     with open(file_path, "w", newline="") as csvfile:
-#         fieldnames = [
-#             "code",
-#             "name",
-#             "current_price",
-#             "market_cap",
-#             "circulating_supply",
-#             "total_supply",
-#             "max_supply",
-#             "last_updated",
-#         ]
-#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-#         writer.writeheader()
-#         for crypto in cryptos:
-#             # sometimes some of the fieldnames are not present in the data
-#             # however this does not code work at the moment
-#             clean_crypto = {
-#                 key: crypto[key] if crypto[key] is not None else ""
-#                 for key in fieldnames
-#             }
-#             writer.writerow(clean_crypto)
-
-#         print("###### Cryptocurrency CSV created successfully ######")
