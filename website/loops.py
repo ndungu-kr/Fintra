@@ -95,8 +95,6 @@ def check_latest_update(asset):
 
     try:
         engine = create_engine("sqlite:///./instance/database.db")
-        # Session = sessionmaker(bind=engine)
-        # session = Session()
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 
