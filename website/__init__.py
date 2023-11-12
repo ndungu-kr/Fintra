@@ -1,11 +1,20 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from os import path
+from os import path, pardir, makedirs
 from flask_login import LoginManager
 
 
 db = SQLAlchemy()
-DB_NAME = "database.db"
+
+
+# Get the parent directory path
+parent_dir = path.abspath(path.join(path.dirname(__file__), pardir))
+
+# Set the path for the database file within the 'Database' folder in the parent directory
+DB_FOLDER = path.join(parent_dir, 'Database')
+makedirs(DB_FOLDER, exist_ok=True)  # Create 'Database' folder if it doesn't exist
+
+DB_NAME = path.join(DB_FOLDER, 'database.db')
 
 
 def create_app():
