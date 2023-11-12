@@ -1,9 +1,6 @@
 *.pyc
 .env
 .venv
-crypto_data
-currency_data
-stock_data
 yfinance.cache
 instance/
 ```      
