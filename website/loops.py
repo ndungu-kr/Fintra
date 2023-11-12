@@ -94,7 +94,7 @@ def check_latest_update(asset):
     from website.models import AssetLastUpdated
 
     try:
-        engine = create_engine("sqlite:///./instance/database.db")
+        engine = create_engine("sqlite:///./Database/database.db")
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 
@@ -152,7 +152,7 @@ def update_last_updated(asset):
     from website.models import AssetLastUpdated
 
     try:
-        engine = create_engine("sqlite:///./instance/database.db")
+        engine = create_engine("sqlite:///./Database/database.db")
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")
 

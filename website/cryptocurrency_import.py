@@ -44,7 +44,7 @@ def crypto_data_to_db(cryptos):
     from website.models import Cryptocurrency
 
     try:
-        engine = create_engine("sqlite:///./instance/database.db")
+        engine = create_engine("sqlite:///./Database/database.db")
         Session = sessionmaker(bind=engine)
     except OperationalError as e:
         print(f"Error connecting to the database: {e}")

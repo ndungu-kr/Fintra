@@ -21,7 +21,7 @@ def initial_currency_import():
     csv_file_path = os.path.join(currency_folder_path, currency_data)
 
     try:
-        engine = create_engine("sqlite:///./instance/database.db")
+        engine = create_engine("sqlite:///./Database/database.db")
         Session = sessionmaker(bind=engine)
         session = Session()
     except OperationalError as e:
@@ -75,7 +75,7 @@ def get_currency_pairs():
 
     # Read db for codes in forex table
     try:
-        engine = create_engine("sqlite:///./instance/database.db")
+        engine = create_engine("sqlite:///./Database/database.db")
         Session = sessionmaker(bind=engine)
         session = Session()
     except OperationalError as e:
@@ -122,7 +122,7 @@ def currency_import():
 
     from website.models import Forex
 
-    engine = create_engine("sqlite:///./instance/database.db")
+    engine = create_engine("sqlite:///./Database/database.db")
     Session = sessionmaker(bind=engine)
 
     for code, name in zip(currency_codes, currency_names):
