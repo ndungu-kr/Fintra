@@ -1,6 +1,6 @@
 from sqlite3 import OperationalError
 import requests
-from os import path, getcwd
+from os import path, getcwd, getenv
 from datetime import datetime, timezone
 import csv
 from sqlalchemy import create_engine
@@ -8,13 +8,11 @@ from sqlalchemy.orm import sessionmaker
 
 
 def crypto_import():
-    api_key = "175fea6e-3c78-4ea7-82af-7fbe9f03a6a5"
-
     # URL for the API endpoint
     url = f"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=1000"
 
     # Setting header with API key
-    headers = {"Accepts": "application/json", "X-CMC_PRO_API_KEY": api_key}
+    headers = {"Accepts": "application/json", "X-CMC_PRO_API_KEY": getenv('cmc_api_key')}
 
     # Retreiving data from API using a GET request
     response = requests.get(url, headers=headers)
