@@ -126,7 +126,7 @@ def dashboard():
     goal_history = investment_goals_history()
 
     return render_template(
-        "dashboard.html",
+        "wallets/dashboard.html",
         user=current_user,
         net_worth=net_worth,
         total_profit=total_profit,

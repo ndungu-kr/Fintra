@@ -55,7 +55,7 @@ def cryptocurrency_wallet():
     goal_history = get_goal_history()
 
     return render_template(
-        "cryptocurrency_wallet.html",
+        "wallets/cryptocurrency_wallet.html",
         user=current_user,
         total_asset_balance=total_asset_balance,
         total_asset_profit=total_asset_profit,

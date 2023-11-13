@@ -60,7 +60,7 @@ def forex_wallet():
     goal_history = get_goal_history()
 
     return render_template(
-        "forex_wallet.html",
+        "wallets/forex_wallet.html",
         user=current_user,
         user_assets=user_assets,
         user_asset_values=user_asset_values,
