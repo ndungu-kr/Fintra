@@ -1,8 +1,8 @@
 from flask import render_template
 from flask_login import current_user, login_required
 from website.stock_import import stock_validity_check
-from website.views import views
-from . import db
+from .views import views
+from .. import db
 import decimal
 import json
 from datetime import datetime, timedelta
