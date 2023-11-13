@@ -38,7 +38,7 @@ def stocks():
         stock.price_date_only = stock.price_date.strftime("%d/%m/%Y")
 
     return render_template(
-        "stocks.html",
+        "assets/stocks.html",
         user=current_user,
         stocks=stocks,
     )

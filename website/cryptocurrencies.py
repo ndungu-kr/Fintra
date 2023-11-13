@@ -23,7 +23,7 @@ def cryptocurrencies():
         )
 
     return render_template(
-        "cryptocurrencies.html", user=current_user, cryptocurrencies=cryptocurrencies
+        "assets/cryptocurrencies.html", user=current_user, cryptocurrencies=cryptocurrencies
     )
 
 

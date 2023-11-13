@@ -13,4 +13,4 @@ def exchanges():
     # arrange exchanges in alphabetical order
     exchanges.sort(key=lambda x: x.country)
 
-    return render_template("exchanges.html", user=current_user, exchanges=exchanges)
+    return render_template("assets/exchanges.html", user=current_user, exchanges=exchanges)
