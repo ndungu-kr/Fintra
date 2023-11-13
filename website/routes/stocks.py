@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_login import current_user, login_required
-from website.views import views
-from . import db
+from .views import views
+from .. import db
 from website.models import Stock, Exchange
 
 
@@ -38,7 +38,7 @@ def stocks():
         stock.price_date_only = stock.price_date.strftime("%d/%m/%Y")
 
     return render_template(
-        "stocks.html",
+        "assets/stocks.html",
         user=current_user,
         stocks=stocks,
     )

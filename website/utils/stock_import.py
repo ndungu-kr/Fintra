@@ -134,7 +134,7 @@ def stock_import():
             update_prices(stock_tickers, data)
 
             # Update the last updated date for stocks
-            from website.loops import update_last_updated
+            from .loops import update_last_updated
 
             asset = "stock"
             update_last_updated(asset)

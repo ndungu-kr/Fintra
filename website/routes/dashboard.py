@@ -1,23 +1,23 @@
 from flask import render_template
 from flask_login import current_user, login_required
-from website.views import views
-from . import db
+from .views import views
+from .. import db
 from decimal import Decimal
 from datetime import datetime, timedelta
 
-from website.cryptocurrency import (
+from .cryptocurrency import (
     calc_asset_totals as calc_crypto_totals,
     calc_total_profits as calc_crypto_profits,
     calc_monthly_breakdown as calc_crypto_monthly_breakdown,
     investment_history as crypto_investment_history,
 )
-from website.forex import (
+from .forex import (
     calc_asset_totals as calc_forex_totals,
     calc_total_profits as calc_forex_profits,
     calc_monthly_breakdown as calc_forex_monthly_breakdown,
     investment_history as forex_investment_history,
 )
-from website.stock import (
+from .stock import (
     calc_asset_totals as calc_stock_totals,
     calc_total_profits as calc_stock_profits,
     calc_monthly_breakdown as calc_stock_monthly_breakdown,
@@ -126,7 +126,7 @@ def dashboard():
     goal_history = investment_goals_history()
 
     return render_template(
-        "dashboard.html",
+        "wallets/dashboard.html",
         user=current_user,
         net_worth=net_worth,
         total_profit=total_profit,

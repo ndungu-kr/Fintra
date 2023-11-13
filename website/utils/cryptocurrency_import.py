@@ -118,7 +118,7 @@ def crypto_data_to_db(cryptos):
         print(f"Error inserting data into cryptocurrency table: {e}")
 
     # Update AssetLastUpdated table
-    from website.loops import update_last_updated
+    from .loops import update_last_updated
 
     asset = "cryptocurrency"
     update_last_updated(asset)

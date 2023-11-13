@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_login import current_user, login_required
-from website.views import views
-from . import db
+from .views import views
+from .. import db
 from website.models import Forex
 
 
@@ -18,7 +18,7 @@ def currencies():
             currency.usd_price = format_with_commas(currency.usd_price)
             currency.current_price = format_with_commas(currency.current_price)
 
-    return render_template("currencies.html", user=current_user, currencies=currencies)
+    return render_template("assets/currencies.html", user=current_user, currencies=currencies)
 
 
 def format_with_commas(value):
