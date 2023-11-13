@@ -10,5 +10,5 @@ from website.dashboard import *
 from website.exchanges import *
 from website.cryptocurrencies import *
 from website.currencies import *
-from website.profile import *
+from website.user.profile import *
 from website.stocks import *
