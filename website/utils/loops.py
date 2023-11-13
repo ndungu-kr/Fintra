@@ -4,11 +4,19 @@ import threading
 import time
 from flask import current_app
 from sqlalchemy import create_engine
+<<<<<<< HEAD:website/loops.py
 from website.imports.cryptocurrency_import import crypto_import
 from website.imports.currency_import import initial_currency_import, currency_import
 from sqlalchemy.orm import sessionmaker
 
 from website.imports.stock_import import import_yfinance_codes, stock_import
+=======
+from .cryptocurrency_import import crypto_import
+from .currency_import import initial_currency_import, currency_import
+from sqlalchemy.orm import sessionmaker
+
+from .stock_import import import_yfinance_codes, stock_import
+>>>>>>> 6731514ed8b18ab26b381dd4a923da425875a211:website/utils/loops.py
 
 
 def start_crypto_thread():

@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_login import current_user, login_required
-from website.views import views
-from . import db
+from .views import views
+from .. import db
 from website.models import Stock, Exchange
 
 

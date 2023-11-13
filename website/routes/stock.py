@@ -1,8 +1,14 @@
 from flask import render_template
 from flask_login import current_user, login_required
+<<<<<<< HEAD:website/stock.py
 from website.imports.stock_import import stock_validity_check
 from website.views import views
 from . import db
+=======
+from ..utils.stock_import import stock_validity_check
+from .views import views
+from .. import db
+>>>>>>> 6731514ed8b18ab26b381dd4a923da425875a211:website/routes/stock.py
 import decimal
 import json
 from datetime import datetime, timedelta
