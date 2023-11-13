@@ -38,7 +38,7 @@ def profile():
         latest_user_goal = None
 
     return render_template(
-        "profile.html",
+        "user/profile.html",
         user=current_user,
         profile_modal_errors=profile_modal_errors,
         goal_modal_errors=goal_modal_errors,

@@ -24,7 +24,7 @@ def login():
         else:
             flash("Email does not exist, please sign-up", category="error")
 
-    return render_template("login.html", user=current_user)
+    return render_template("user/login.html", user=current_user)
 
 
 @auth.route("/logout")
@@ -73,4 +73,4 @@ def sign_up():
             flash("Account created.", category="success")
             return redirect(url_for("views.dashboard"))
 
-    return render_template("sign_up.html", user=current_user)
+    return render_template("user/sign_up.html", user=current_user)
