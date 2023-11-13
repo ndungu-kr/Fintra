@@ -158,7 +158,7 @@ def currency_import():
                 session.commit()
 
     # Update AssetLastUpdated table
-    from website.loops import update_last_updated
+    from .loops import update_last_updated
 
     asset = "forex"
     update_last_updated(asset)
