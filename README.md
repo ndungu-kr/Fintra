@@ -15,7 +15,7 @@ git clone https://github.com/ndungu-kr/fintra.git
 
 ## Step 2:
 
-In the same directory as tha main.py file, create a virtual environment using the command:
+In the same directory as the main.py file, create a virtual environment using the command:
 
 py -m venv .venv
 
@@ -31,7 +31,7 @@ python -m pip install -r requirements.txt
 
 Upgrade your pip if need be using:
 
-python -m pip install --upgrade pip
+py -m pip install --upgrade pip
 
 ## Step 4:
 
@@ -55,7 +55,7 @@ Enter your credentials and select the basic (free) plan.
 
 On your Overview page generate and copy your api key.
 
-Replace <cmc_key_here> with your API key.
+In your .env file replace <cmc_key_here> with your API key.
 
 ### Open Exchange Rates API
 
@@ -65,7 +65,7 @@ Fill in your credentials and sign up.
 
 Navigate to App IDs and Generate New App ID.
 
-Copy this key and replace <oer_key_here> with your key.
+Copy this key and replace <oer_key_here> with your key in your .env file.
 
 ## Step 6:
 
@@ -84,5 +84,7 @@ Where <stock_ticker> is a stock code/ticker you should try updating your yfinanc
 While in your virtual environment, use the command:
 
 pip install yfinance --upgrade --no-cache-dir
+
+This command updates your yfinance package.
 
 This works most of the time unless there is a problem with yfinance, if so please feel free to send me a messgae so that I can investigate.
