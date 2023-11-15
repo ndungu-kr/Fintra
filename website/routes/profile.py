@@ -1,10 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required
-<<<<<<< HEAD:website/user/profile.py
-from website.views import views
-=======
 from .views import views
->>>>>>> 6731514ed8b18ab26b381dd4a923da425875a211:website/routes/profile.py
 from .. import db
 import decimal
 import json
